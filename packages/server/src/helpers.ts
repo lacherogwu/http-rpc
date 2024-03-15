@@ -1,7 +1,7 @@
 import type { FastifySchemaCompiler } from 'fastify';
 import type { FastifySerializerCompiler } from 'fastify/types/schema';
-import superjson from 'superjson';
 import type { ZodAny, ZodError } from 'zod';
+import type { DataTransformer } from './types';
 
 export class RequestValidationError extends Error {
 	errors: ZodError['errors'];
@@ -22,28 +22,36 @@ export class ResponseValidationError extends Error {
 	}
 }
 
-export const validatorCompiler: FastifySchemaCompiler<ZodAny> = ({ schema, method }) => {
-	return data => {
-		if (method === 'GET') {
-			data = data.input || '{}';
-		} else if (method === 'POST') {
-			data = JSON.stringify(data);
-		}
-		const json = superjson.parse(data);
-		try {
-			return { value: schema.parse(json) };
-		} catch (err: any) {
-			return { error: new RequestValidationError(err) };
-		}
+export const createValidatorCompiler = (transformer: DataTransformer = JSON) => {
+	const validatorCompiler: FastifySchemaCompiler<ZodAny> = ({ schema, method }) => {
+		return data => {
+			if (method === 'GET') {
+				data = data.input;
+			} else if (method === 'POST') {
+				data = JSON.stringify(data);
+			}
+			const json = transformer.parse(data || '{}');
+			try {
+				return { value: schema.parse(json) };
+			} catch (err: any) {
+				return { error: new RequestValidationError(err) };
+			}
+		};
 	};
-};
 
-export const serializerCompiler: FastifySerializerCompiler<ZodAny> =
-	({ schema }) =>
-	data => {
-		const result = schema.safeParse(data);
-		if (result.success) {
-			return superjson.stringify(result.data);
-		}
-		throw new ResponseValidationError(result);
-	};
+	return validatorCompiler;
+};
+export const createSerializerCompiler = (transformer: DataTransformer = JSON) => {
+	const serializerCompiler: FastifySerializerCompiler<ZodAny> =
+		({ schema }) =>
+		data => {
+			const result = schema.safeParse(data);
+
+			if (result.success) {
+				return transformer.stringify(result.data);
+			}
+			throw new ResponseValidationError(result);
+		};
+
+	return serializerCompiler;
+};

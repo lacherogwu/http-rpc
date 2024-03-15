@@ -1,7 +1,8 @@
 import fp from 'fastify-plugin';
-import { validatorCompiler, serializerCompiler, RequestValidationError } from './helpers';
+import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from './helpers';
 import { FixedRoute } from './route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { DataTransformer } from './types';
 
 type Router = {
 	[key: string]: FixedRoute | Router;
@@ -10,11 +11,12 @@ type Router = {
 type FastifyPluginOptions = {
 	router: Router;
 	prefix?: string;
+	transformer?: DataTransformer;
 };
 
 export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
-	fastify.setValidatorCompiler(validatorCompiler);
-	fastify.setSerializerCompiler(serializerCompiler);
+	fastify.setValidatorCompiler(createValidatorCompiler(opts.transformer));
+	fastify.setSerializerCompiler(createSerializerCompiler(opts.transformer));
 
 	const { prefix } = opts;
 
@@ -29,27 +31,23 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	function registerRoutes(key: string = '', route: Router | FixedRoute) {
 		if (route instanceof FixedRoute) {
 			const schema = {};
-			if (route.output) {
+			Object.assign(schema, {
+				response: {
+					200: route.output,
+				},
+			});
+
+			if (route.method === 'GET') {
 				Object.assign(schema, {
-					response: {
-						200: route.output,
-					},
+					querystring: route.input,
+				});
+			} else if (route.method === 'POST') {
+				Object.assign(schema, {
+					body: route.input,
 				});
 			}
 
-			if (route.input) {
-				if (route.method === 'GET') {
-					Object.assign(schema, {
-						querystring: route.input,
-					});
-				} else if (route.method === 'POST') {
-					Object.assign(schema, {
-						body: route.input,
-					});
-				}
-			}
-
-			const handler = (request: FastifyRequest, reply: FastifyReply) => {
+			const handler = async (request: FastifyRequest, reply: FastifyReply) => {
 				return route.handler({
 					request,
 					reply,
