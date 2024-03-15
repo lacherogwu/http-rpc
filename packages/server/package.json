@@ -1,16 +1,30 @@
 {
 	"name": "@frpc/server",
-	"version": "0.0.0",
-	"description": "",
-	"main": "index.js",
+	"version": "0.0.2",
+	"description": "RPC server plugin for Fastify",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "tsup src/index.ts --format esm --dts",
+		"build:watch": "tsup src/index.ts --watch --format esm --dts",
+		"lint": "tsc"
 	},
 	"keywords": [],
 	"author": "LacheRo`",
 	"license": "MIT",
 	"type": "module",
-  "publishConfig": {
-    "access": "public"
-  }
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"fastify-plugin": "^4.5.1",
+		"superjson": "^2.2.1",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"fastify": "^4.26.2"
+	}
 }
