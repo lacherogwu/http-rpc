@@ -6,7 +6,6 @@ type ZodInfer<T> = T extends ZodType ? z.infer<T> : never;
 type Ctx<InputSchema extends ZodType | unknown = unknown> = {
 	request: FastifyRequest;
 	reply: FastifyReply;
-	userId: number;
 	input: ZodInfer<InputSchema>;
 };
 
@@ -31,7 +30,7 @@ export class Route<InputSchema extends ZodType | unknown = unknown, OutputSchema
 	#handler: (ctx: Ctx<InputSchema> & MiddlewareContext) => unknown;
 	#input: ZodObject<any> | ZodAny;
 	#output: ZodType;
-	#middlewares: ((...args: any[]) => any)[];
+	#middlewares: ((ctx: Ctx<InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
 		this.#input = data?.input ?? z.any();
@@ -79,7 +78,7 @@ export class Route<InputSchema extends ZodType | unknown = unknown, OutputSchema
 		return this.#create({ output: schema }) as unknown as Route<InputSchema, Schema, MiddlewareContext>;
 	}
 
-	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<InputSchema>) => T) {
+	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {
 		return this.#create({ middleware }) as unknown as Route<InputSchema, OutputSchema, MiddlewareContext & Awaited<T>>;
 	}
 

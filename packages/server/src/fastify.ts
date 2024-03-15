@@ -4,6 +4,10 @@ import { FixedRoute } from './route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { DataTransformer } from './types';
 
+type FastifyRequestWithCtx = FastifyRequest & {
+	_frpcContext: Record<string, any>;
+};
+
 type Router = {
 	[key: string]: FixedRoute | Router;
 };
@@ -47,19 +51,24 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 				});
 			}
 
-			const handler = async (request: FastifyRequest, reply: FastifyReply) => {
-				return route.handler({
-					request,
-					reply,
-					userId: 1,
-					input: request.body ?? request.query,
-				});
+			const handler = async (request: FastifyRequestWithCtx) => {
+				return route.handler(request._frpcContext);
+			};
+
+			const preHandlerWrapper = (cb: any) => {
+				return async (request: FastifyRequestWithCtx, reply: FastifyReply) => {
+					if (!request._frpcContext) request._frpcContext = { request, reply, input: request.body ?? request.query };
+					const result = await cb(request._frpcContext);
+					Object.assign(request._frpcContext, result);
+				};
 			};
 
 			fastify.route({
 				method: route.method,
 				url: `${prefix}${key}`,
-				// preHandler: route.middlewares ?? [],
+				// @ts-ignore
+				preHandler: route.middlewares.map(preHandlerWrapper),
+				// @ts-ignore
 				handler: handler,
 				schema,
 			});

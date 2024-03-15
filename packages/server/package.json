@@ -1,6 +1,6 @@
 {
 	"name": "@frpc/server",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "RPC server plugin for Fastify",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -10,7 +10,8 @@
 	"scripts": {
 		"build": "tsup src/index.ts --format esm --dts",
 		"build:watch": "tsup src/index.ts --watch --format esm --dts",
-		"lint": "tsc"
+		"lint": "tsc",
+		"prepublishOnly": "npm run build"
 	},
 	"keywords": [],
 	"author": "LacheRo`",
