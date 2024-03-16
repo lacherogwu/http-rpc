@@ -1,7 +1,7 @@
 {
-	"name": "@frpc/server",
-	"version": "0.0.3",
-	"description": "RPC server plugin for Fastify",
+	"name": "@http-rpc/server",
+	"version": "0.0.1",
+	"description": "HTTP RPC server",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
@@ -13,12 +13,32 @@
 		"lint": "tsc",
 		"prepublishOnly": "npm run build"
 	},
-	"keywords": [],
+	"keywords": [
+		"http",
+		"rpc",
+		"server",
+		"axios",
+		"http-rpc",
+		"http-rpc-server",
+		"fastify",
+		"express",
+		"koa",
+		"hapi",
+		"rest",
+		"typescript",
+		"api",
+		"json",
+		"rpc",
+		"http-rpc-server"
+	],
 	"author": "LacheRo`",
 	"license": "MIT",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
+	},
+	"repository": {
+		"url": "https://github.com/lacherogwu/http-rpc"
 	},
 	"dependencies": {
 		"fastify-plugin": "^4.5.1",

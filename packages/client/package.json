@@ -1,16 +1,46 @@
 {
-	"name": "@frpc/client",
-	"version": "0.0.0",
-	"description": "",
-	"main": "index.js",
+	"name": "@http-rpc/client",
+	"version": "0.0.1",
+	"description": "HTTP RPC Client",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "tsup src/index.ts --format esm --dts",
+		"build:watch": "tsup src/index.ts --watch --format esm --dts",
+		"lint": "tsc",
+		"prepublishOnly": "npm run build"
 	},
-	"keywords": [],
+	"keywords": [
+		"http",
+		"rpc",
+		"client",
+		"axios",
+		"http-rpc",
+		"http-rpc-client",
+		"fastify",
+		"express",
+		"koa",
+		"hapi",
+		"rest",
+		"typescript",
+		"api",
+		"json",
+		"rpc",
+		"http-rpc-server"
+	],
 	"author": "LacheRo`",
 	"license": "MIT",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
+	},
+	"repository": {
+		"url": "https://github.com/lacherogwu/http-rpc"
+	},
+	"dependencies": {
+		"axios": "^1.6.8"
 	}
 }

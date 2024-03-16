@@ -1,1 +1,1 @@
-# RPC server plugin for Fastify
+# HTTP RPC Server

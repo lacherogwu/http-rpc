@@ -19,27 +19,18 @@ type FastifyPluginOptions = {
 };
 
 export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
-	fastify.setValidatorCompiler(createValidatorCompiler(opts.transformer));
-	fastify.setSerializerCompiler(createSerializerCompiler(opts.transformer));
+	const { prefix, transformer, router } = opts;
 
-	const { prefix } = opts;
-
-	fastify.route({
-		method: 'GET',
-		url: `${prefix}/version`,
-		handler: async (request, reply) => {
-			return { version: '1.0.0' };
-		},
-	});
+	fastify.setValidatorCompiler(createValidatorCompiler(transformer));
+	fastify.setSerializerCompiler(createSerializerCompiler(transformer));
 
 	function registerRoutes(key: string = '', route: Router | FixedRoute) {
 		if (route instanceof FixedRoute) {
-			const schema = {};
-			Object.assign(schema, {
+			const schema = {
 				response: {
 					200: route.output,
 				},
-			});
+			};
 
 			if (route.method === 'GET') {
 				Object.assign(schema, {
@@ -79,7 +70,7 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 			}
 		}
 	}
-	registerRoutes('', opts.router);
+	registerRoutes('', router);
 
 	fastify.setErrorHandler((err, request, reply) => {
 		if (err instanceof RequestValidationError) {
