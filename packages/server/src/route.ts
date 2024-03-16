@@ -1,7 +1,10 @@
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import z, { ZodType, ZodObject, ZodAny } from 'zod';
 
 type ZodInfer<T> = T extends ZodType ? z.infer<T> : never;
+
+// TODO: remove fastify dependency
+// change to req & res, and provide to Route<FastifyRequest, FastifyReply> and Ctx<FastifyRequest, FastifyReply> generics
 
 type Ctx<InputSchema extends ZodType | unknown = unknown> = {
 	request: FastifyRequest;
