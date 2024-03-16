@@ -1,6 +1,6 @@
 {
 	"name": "@http-rpc/server",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "HTTP RPC Server",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -8,8 +8,8 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts",
-		"build:watch": "tsup src/index.ts --watch --format esm --dts",
+		"build": "rm -rf dist && tsup src/index.ts --format esm --dts",
+		"build:watch": "npm run build -- --watch",
 		"lint": "tsc",
 		"prepublishOnly": "npm run build"
 	},
@@ -38,11 +38,15 @@
 		"access": "public"
 	},
 	"repository": {
-		"url": "https://github.com/lacherogwu/http-rpc"
+		"type": "git",
+		"url": "git+https://github.com/lacherogwu/http-rpc.git",
+		"directory": "packages/server"
 	},
 	"dependencies": {
+		"change-case": "^5.4.3",
 		"fastify-plugin": "^4.5.1",
-		"zod": "^3.22.4"
+		"zod": "^3.22.4",
+		"zod-to-ts": "^1.2.0"
 	},
 	"devDependencies": {
 		"fastify": "^4.26.2"

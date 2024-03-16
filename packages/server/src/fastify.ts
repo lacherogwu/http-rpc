@@ -2,14 +2,10 @@ import fp from 'fastify-plugin';
 import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from './helpers';
 import { FixedRoute } from './route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { DataTransformer } from './types';
+import type { Router, DataTransformer } from './types';
 
 type FastifyRequestWithCtx = FastifyRequest & {
 	_frpcContext: Record<string, any>;
-};
-
-type Router = {
-	[key: string]: FixedRoute | Router;
 };
 
 type FastifyPluginOptions = {
