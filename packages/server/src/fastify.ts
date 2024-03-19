@@ -5,7 +5,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Router, DataTransformer } from './types';
 
 type FastifyRequestWithCtx = FastifyRequest & {
-	_frpcContext: Record<string, any>;
+	_httpRpcCtx: Record<string, any>;
 };
 
 type FastifyPluginOptions = {
@@ -39,14 +39,14 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 			}
 
 			const handler = async (request: FastifyRequestWithCtx) => {
-				return route.handler(request._frpcContext);
+				return route.handler(request._httpRpcCtx);
 			};
 
 			const preHandlerWrapper = (cb: any) => {
 				return async (request: FastifyRequestWithCtx, reply: FastifyReply) => {
-					if (!request._frpcContext) request._frpcContext = { request, reply, input: request.body ?? request.query };
-					const result = await cb(request._frpcContext);
-					Object.assign(request._frpcContext, result);
+					if (!request._httpRpcCtx) request._httpRpcCtx = { request, reply, input: request.body ?? request.query };
+					const result = await cb(request._httpRpcCtx);
+					Object.assign(request._httpRpcCtx, result);
 				};
 			};
 
