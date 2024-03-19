@@ -1,17 +1,14 @@
 {
 	"name": "@http-rpc/client",
-	"version": "0.0.5",
+	"version": "0.0.7",
 	"description": "HTTP RPC Client",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
 		"dist"
 	],
-	"bin": {
-		"@http-rpc/client": "dist/cli.js"
-	},
 	"scripts": {
-		"build": "rm -rf dist && tsup src/index.ts src/cli.ts --format esm --dts",
+		"build": "rm -rf dist && tsup src/index.ts --format esm --dts",
 		"build:watch": "npm run build -- --watch",
 		"lint": "tsc",
 		"prepublishOnly": "npm run build"
@@ -46,7 +43,6 @@
 		"directory": "packages/client"
 	},
 	"dependencies": {
-		"axios": "^1.6.8",
-		"cac": "^6.7.14"
+		"axios": "^1.6.8"
 	}
 }

@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// UNUSED
+// @ts-nocheck
+
 import { cac } from 'cac';
 import fs from 'node:fs/promises';
 
