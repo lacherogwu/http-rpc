@@ -46,8 +46,12 @@ export const router = {
 			.input(z.object({ fields: z.array(z.string()) }))
 			.output(z.array(z.object({ id: z.number(), amount: z.number() })))
 			.get(ctx => {
+				const { userId } = ctx;
 				const { fields } = ctx.input;
 				return await prisma.order.findMany({
+					where: {
+						userId,
+					},
 					select: Object.keys(fields).reduce((acc, field) => {
 						acc[field] = true;
 						return acc;
