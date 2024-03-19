@@ -40,7 +40,7 @@ const authenticatedRoute = publicRoute.middleware(ctx => {
 });
 
 export const router = {
-	version: publicRoute.get(() => ({ version: '1.0.0' })),
+	version: publicRoute.output(z.object({ version: z.string() })).get(() => ({ version: '1.0.0' })),
 	orders: {
 		list: authenticatedRoute
 			.input(z.object({ fields: z.array(z.string()) }))
