@@ -1,15 +1,14 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import z, { ZodType, ZodObject, ZodAny } from 'zod';
-
-type ZodInfer<T> = T extends ZodType ? z.infer<T> : never;
+import { Prettify } from './types';
 
 // TODO: remove fastify dependency
 // change to req & res, and provide to Route<FastifyRequest, FastifyReply> and Ctx<FastifyRequest, FastifyReply> generics
 
-type Ctx<InputSchema extends ZodType | unknown = unknown> = {
+type Ctx<InputSchema = unknown> = {
 	request: FastifyRequest;
 	reply: FastifyReply;
-	input: ZodInfer<InputSchema>;
+	input: InputSchema;
 };
 
 export class FixedRoute<Ctx = any, T = any> {
@@ -28,7 +27,7 @@ export class FixedRoute<Ctx = any, T = any> {
 	}
 }
 
-export class Route<InputSchema extends ZodType | unknown = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
+export class Route<InputSchema = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
 	#method: 'POST' | 'GET' | null;
 	#handler: (ctx: Ctx<InputSchema> & MiddlewareContext) => unknown;
 	#input: ZodObject<any> | ZodAny;
@@ -74,7 +73,7 @@ export class Route<InputSchema extends ZodType | unknown = unknown, OutputSchema
 	}
 
 	input<Schema extends ZodObject<any>>(schema: Schema) {
-		return this.#create({ input: schema }) as unknown as Route<InputSchema & Schema, OutputSchema, MiddlewareContext>;
+		return this.#create({ input: schema }) as unknown as Route<Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
 	}
 
 	output<Schema extends ZodType>(schema: Schema) {
@@ -82,7 +81,7 @@ export class Route<InputSchema extends ZodType | unknown = unknown, OutputSchema
 	}
 
 	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {
-		return this.#create({ middleware }) as unknown as Route<InputSchema, OutputSchema, MiddlewareContext & Awaited<T>>;
+		return this.#create({ middleware }) as unknown as Route<InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 
 	post<T extends z.infer<OutputSchema> | Promise<z.infer<OutputSchema>>>(cb: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {

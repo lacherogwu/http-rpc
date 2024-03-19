@@ -8,3 +8,7 @@ export type DataTransformer = {
 export type Router = {
 	[key: string]: FixedRoute | Router;
 };
+
+export type Prettify<T> = {
+	[K in keyof T]: T[K];
+} & {};
