@@ -4,12 +4,18 @@ import * as changeCase from 'change-case';
 import { FixedRoute } from './route';
 import { ZodType } from 'zod';
 
-export async function generateClientTypes(router: Router) {
-	// console.log(router);
+export function generateClientTypes(router: Router) {
+	// TODO: use the typescript compiler api to generate the types
+	// also will be capable of generating the inferred type of the function instead of using the output value
+	// also will be able to pretty print the types
 
-	async function generateTypes(route: Router | FixedRoute, path: string[] = []) {
+	const routesTypes: string[] = [];
+	const routerType: Record<string, any> = {};
+
+	function generateTypes(route: Router | FixedRoute, path: string[] = []) {
 		if (route instanceof FixedRoute) {
-			const id = path.join('.');
+			const finalPath = path.concat(route.method.toLowerCase());
+			const id = finalPath.join('.');
 			const typeIdentifier = changeCase.pascalCase(id);
 			const inputId = `${typeIdentifier}Input`;
 			const outputId = `${typeIdentifier}Output`;
@@ -17,8 +23,20 @@ export async function generateClientTypes(router: Router) {
 			const inputType = generateTypeAlias(route.input, inputId);
 			const outputType = generateTypeAlias(route.output, outputId);
 
-			console.log(inputType);
-			console.log(outputType);
+			let curr = routerType;
+			for (let i = 0; i < finalPath.length; i++) {
+				const k = finalPath[i]!;
+				curr[k] = curr[k] || {};
+				if (i === finalPath.length - 1) {
+					// TODO: when using the typescript compiler api, we can infer the type of the function and then decide if we need to include the input or not
+					curr[k] = `(${inputType.endsWith('any;') ? '' : `input: ${inputId}`}) => Promise<${outputId}>`;
+				} else {
+					curr = curr[k]!;
+				}
+			}
+
+			routesTypes.push(inputType);
+			routesTypes.push(outputType);
 		} else {
 			for (const k in route) {
 				const value = route[k]!;
@@ -33,18 +51,7 @@ export async function generateClientTypes(router: Router) {
 		return `export ${printNode(typeAlias)}`;
 	}
 
-	const types = generateTypes(router);
-	//   const types = generateTypes(router);
+	generateTypes(router);
+	const clientType = JSON.stringify(routerType, null, 2).replace(/"/g, '');
+	return '/* Types generated automatically by @http-rpc/server */\n\n' + routesTypes.join('\n') + '\n' + `export type Client = ${clientType}`;
 }
-
-// const id = 'auth.users.listOutput';
-// // pass schema and name of type/identifier
-// const identifier = changeCase.pascalCase(id);
-// const { node } = zodToTs(UserSchema, identifier);
-// const typeAlias = createTypeAlias(
-// 	node,
-// 	identifier,
-// 	// optionally pass a comment
-// 	// comment: UserSchema.description
-// );
-// console.log(`export ${printNode(typeAlias)}`);
