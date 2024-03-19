@@ -11,6 +11,9 @@ export function createClient<T>(opts?: Opts): T {
 
 	const instance = axios.create({
 		baseURL: url,
+		headers: {
+			'Content-Type': 'application/json',
+		},
 		transformRequest: data => transformer.stringify(data),
 		paramsSerializer: params => `input=${transformer.stringify(params)}`,
 		transformResponse: data => transformer.parse(data),
