@@ -13,10 +13,9 @@ npm install @http-rpc/client
 ```typescript
 import superjson from 'superjson';
 import { createClient } from '@http-rpc/client';
-import type { Client } from './.rpcClient';
-export type * from './.rpcClient';
+import type { Router } from '../server/rpc/router';
 
-export const client = createClient<Client>({
+export const client = createClient<Router>({
 	url: 'http://localhost:3000/rpc',
 	transformer: superjson,
 });

@@ -1,4 +1,4 @@
-import type { FixedRoute } from './route';
+import type { Endpoint } from './route';
 
 export type DataTransformer = {
 	parse: (object: any) => any;
@@ -6,7 +6,7 @@ export type DataTransformer = {
 };
 
 export type Router = {
-	[key: string]: FixedRoute | Router;
+	[key: string]: Endpoint | Router;
 };
 
 export type Prettify<T> = {

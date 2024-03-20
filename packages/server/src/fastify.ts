@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from './helpers';
-import { FixedRoute } from './route';
+import { Endpoint } from './route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Router, DataTransformer } from './types';
 
@@ -20,8 +20,8 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	fastify.setValidatorCompiler(createValidatorCompiler(transformer));
 	fastify.setSerializerCompiler(createSerializerCompiler(transformer));
 
-	function registerRoutes(key: string = '', route: Router | FixedRoute) {
-		if (route instanceof FixedRoute) {
+	function registerRoutes(key: string = '', route: Router | Endpoint) {
+		if (route instanceof Endpoint) {
 			const schema = {
 				response: {
 					200: route.output,
@@ -68,7 +68,7 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	}
 	registerRoutes('', router);
 
-	fastify.setErrorHandler((err, request, reply) => {
+	fastify.setErrorHandler((err, _request, reply) => {
 		if (err instanceof RequestValidationError) {
 			const { statusCode = 400, code, errors } = err;
 			return reply.status(statusCode).send({

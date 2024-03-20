@@ -40,7 +40,13 @@ const authenticatedRoute = publicRoute.middleware(ctx => {
 });
 
 export const router = {
-	version: publicRoute.output(z.object({ version: z.string() })).get(() => ({ version: '1.0.0' })),
+	version: publicRoute
+		.output(
+			z.object({
+				version: z.string(),
+			}),
+		)
+		.get(() => ({ version: '1.0.0' })),
 	orders: {
 		list: authenticatedRoute
 			.input(z.object({ fields: z.array(z.string()) }))
@@ -60,15 +66,6 @@ export const router = {
 			}),
 	},
 };
-```
 
-## Generate Client Types (temporary)
-
-```typescript
-import { generateClientTypes } from '@http-rpc/server';
-import { router } from './router';
-import fs from 'node:fs';
-
-const dts = generateClientTypes(router);
-fs.writeFileSync('../web/src/services/.rpcClient.d.ts', dts);
+export type Router = typeof router;
 ```
