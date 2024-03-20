@@ -1,9 +1,11 @@
 import axios from 'axios';
 import type { DataTransformer } from './types';
 
+type HTTPHeaders = Record<string, string>;
 type Opts = {
 	url: string;
 	transformer?: DataTransformer;
+	headers?: HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
 };
 
 type InferPromise<T> = T extends Promise<infer U> ? U : T;
@@ -35,7 +37,14 @@ type ClientType<T> = T extends Record<string, any>
 	: never;
 
 export function createClient<T>(opts?: Opts): ClientType<T> {
-	const { url, transformer = JSON } = opts ?? {};
+	const { url, transformer = JSON, headers } = opts ?? {};
+
+	const getHeaders = async () => {
+		if (typeof headers === 'function') {
+			return headers();
+		}
+		return headers;
+	};
 
 	const instance = axios.create({
 		baseURL: url,
@@ -55,7 +64,7 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 			path.push(prop);
 			return new Proxy(() => {}, handler);
 		},
-		apply(_target: any, _thisArg: any, args: any[]) {
+		async apply(_target: any, _thisArg: any, args: any[]) {
 			const [input] = args;
 			const method = path.pop();
 			const urlPath = path.join('/');
@@ -64,6 +73,7 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 			const request: Record<string, any> = {
 				method,
 				url: `/${urlPath}`,
+				headers: await getHeaders(),
 			};
 
 			if (method === 'get') {

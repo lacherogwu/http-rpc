@@ -18,6 +18,13 @@ import type { Router } from '../server/rpc/router';
 export const client = createClient<Router>({
 	url: 'http://localhost:3000/rpc',
 	transformer: superjson,
+	async headers() {
+		const token = await getToken();
+
+		return {
+			Authorization: `Bearer ${token}`,
+		};
+	},
 });
 ```
 
