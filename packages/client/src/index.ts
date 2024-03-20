@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { DataTransformer } from './types';
 
-type HTTPHeaders = Record<string, string>;
+type HTTPHeaders = Record<string, string[] | string | undefined>;
 type Opts = {
 	url: string;
 	transformer?: DataTransformer;
