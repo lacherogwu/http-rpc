@@ -43,10 +43,10 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 			};
 
 			const preHandlerWrapper = (cb: any) => {
-				return async (request: FastifyRequestWithCtx, reply: FastifyReply) => {
-					if (!request._httpRpcCtx) request._httpRpcCtx = { request, reply, input: request.body ?? request.query };
-					const result = await cb(request._httpRpcCtx);
-					Object.assign(request._httpRpcCtx, result);
+				return async (req: FastifyRequestWithCtx, res: FastifyReply) => {
+					if (!req._httpRpcCtx) req._httpRpcCtx = { req, res, input: req.body ?? req.query };
+					const result = await cb(req._httpRpcCtx);
+					Object.assign(req._httpRpcCtx, result);
 				};
 			};
 

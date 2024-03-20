@@ -30,7 +30,7 @@ import { z } from 'zod';
 
 const publicRoute = new Route();
 const authenticatedRoute = publicRoute.middleware(ctx => {
-	const { authorization } = ctx.request.headers;
+	const { authorization } = ctx.req.headers;
 	const user = await prisma.user.findUnique({ where: { token: authorization } });
 	if (!user) throw new Error('Unauthorized');
 

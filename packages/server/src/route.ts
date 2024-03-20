@@ -6,8 +6,8 @@ import { Prettify } from './types';
 // change to req & res, and provide to Route<FastifyRequest, FastifyReply> and Ctx<FastifyRequest, FastifyReply> generics
 
 type Ctx<InputSchema = unknown> = {
-	request: FastifyRequest;
-	reply: FastifyReply;
+	req: FastifyRequest;
+	res: FastifyReply;
 	input: InputSchema;
 };
 
