@@ -1,7 +1,8 @@
 import fp from 'fastify-plugin';
-import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from '../helpers';
 import { Endpoint } from '../route';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest, FastifySchemaCompiler } from 'fastify';
+import type { FastifySerializerCompiler } from 'fastify/types/schema';
+import type { ZodAny, ZodError } from 'zod';
 import type { Router, DataTransformer, BaseCtx } from '../types';
 import { RPCError, RPC_CODE_TO_HTTP_STATUS_CODE } from '../error';
 
@@ -91,3 +92,56 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 
 	done();
 });
+
+class RequestValidationError extends Error {
+	errors: ZodError['errors'];
+	constructor(err: ZodError) {
+		super("Request doesn't match the schema");
+		this.name = 'RequestValidationError';
+		this.errors = err.errors;
+	}
+}
+
+class ResponseValidationError extends Error {
+	details: Record<string, any>;
+
+	constructor(validationResult: Record<string, any>) {
+		super("Response doesn't match the schema");
+		this.name = 'ResponseValidationError';
+		this.details = validationResult.error;
+	}
+}
+
+const createValidatorCompiler = (transformer: DataTransformer) => {
+	const validatorCompiler: FastifySchemaCompiler<ZodAny> = ({ schema, method }) => {
+		return data => {
+			if (method === 'GET') {
+				data = data.input;
+			} else if (method === 'POST') {
+				data = JSON.stringify(data);
+			}
+			const json = transformer.parse(data || '{}');
+			try {
+				return { value: schema.parse(json) };
+			} catch (err: any) {
+				return { error: new RequestValidationError(err) };
+			}
+		};
+	};
+
+	return validatorCompiler;
+};
+const createSerializerCompiler = (transformer: DataTransformer) => {
+	const serializerCompiler: FastifySerializerCompiler<ZodAny> =
+		({ schema }) =>
+		data => {
+			const result = schema.safeParse(data);
+
+			if (result.success) {
+				return transformer.stringify(result.data);
+			}
+			throw new ResponseValidationError(result);
+		};
+
+	return serializerCompiler;
+};

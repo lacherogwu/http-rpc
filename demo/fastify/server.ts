@@ -55,6 +55,11 @@ const router = {
 		update: publicRoute.get(() => {
 			throw new RPCError({ code: 'NOT_IMPLEMENTED', message: 'Not implemented' });
 		}),
+		delete: publicRoute.post(() => {
+			console.log('here...');
+			// return { delete: true };
+			return 'deleted';
+		}),
 	},
 };
 

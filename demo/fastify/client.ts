@@ -19,6 +19,7 @@ const client = createClient<Router>({
 		return res;
 	},
 	onError(err) {
+		console.log(err);
 		return err;
 	},
 });
@@ -34,9 +35,9 @@ const client = createClient<Router>({
 // console.log('🚀 → user:', user);
 
 try {
-	const data = await client.users.update.get();
+	const data = await client.users.delete.post();
 	console.log({ data });
 } catch (err: any) {
-	console.log('here');
+	console.log('err');
 	console.log(JSON.stringify(err.response.data, null, 2));
 }
