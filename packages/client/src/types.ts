@@ -1,3 +1,5 @@
+import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+
 type DataTransformer = {
 	parse: (object: any) => any;
 	stringify: (object: any) => any;
@@ -8,6 +10,9 @@ export type Opts = {
 	url: string;
 	transformer?: DataTransformer;
 	headers?: HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
+	onRequest?: (req: InternalAxiosRequestConfig) => InternalAxiosRequestConfig;
+	onResponse?: (res: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>;
+	onError?: (error: any) => any;
 };
 
 type InferPromise<T> = T extends Promise<infer U> ? U : T;

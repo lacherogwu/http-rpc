@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Opts, ClientType } from './types';
 
 export function createClient<T>(opts?: Opts): ClientType<T> {
-	const { url, transformer = JSON, headers } = opts ?? {};
+	const { url, transformer = JSON, headers, onRequest, onResponse, onError } = opts ?? {};
 
 	const getHeaders = async () => {
 		if (typeof headers === 'function') {
@@ -24,6 +24,14 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		},
 	});
 
+	instance.interceptors.request.use(onRequest);
+	instance.interceptors.response.use(onResponse, async err => {
+		if (onError) {
+			const error = await onError(err);
+			return Promise.reject(error);
+		}
+		return Promise.reject(err);
+	});
 	instance.interceptors.response.use(res => res.data);
 
 	let path: string[] = [];

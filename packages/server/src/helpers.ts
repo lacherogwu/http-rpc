@@ -22,7 +22,7 @@ export class ResponseValidationError extends Error {
 	}
 }
 
-export const createValidatorCompiler = (transformer: DataTransformer = JSON) => {
+export const createValidatorCompiler = (transformer: DataTransformer) => {
 	const validatorCompiler: FastifySchemaCompiler<ZodAny> = ({ schema, method }) => {
 		return data => {
 			if (method === 'GET') {
@@ -41,7 +41,7 @@ export const createValidatorCompiler = (transformer: DataTransformer = JSON) => 
 
 	return validatorCompiler;
 };
-export const createSerializerCompiler = (transformer: DataTransformer = JSON) => {
+export const createSerializerCompiler = (transformer: DataTransformer) => {
 	const serializerCompiler: FastifySerializerCompiler<ZodAny> =
 		({ schema }) =>
 		data => {

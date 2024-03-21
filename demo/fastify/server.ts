@@ -52,6 +52,9 @@ const router = {
 					password: '123456', // will not be returned because of the output schema
 				};
 			}),
+		update: publicRoute.get(() => {
+			throw new RPCError({ code: 'NOT_IMPLEMENTED', message: 'Not implemented' });
+		}),
 	},
 };
 

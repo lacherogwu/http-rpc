@@ -18,7 +18,7 @@ type FastifyPluginOptions = {
 export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
 
 export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
-	const { prefix, transformer, router } = opts;
+	const { prefix, transformer = JSON, router } = opts;
 
 	fastify.setValidatorCompiler(createValidatorCompiler(transformer));
 	fastify.setSerializerCompiler(createSerializerCompiler(transformer));
@@ -72,26 +72,21 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	registerRoutes('', router);
 
 	fastify.setErrorHandler((err, _request, reply) => {
+		const result: Record<string, any> = {
+			statusCode: 500,
+			code: 'INTERNAL_SERVER_ERROR',
+			message: err.message ?? 'Internal Server Error',
+		};
 		if (err instanceof RequestValidationError) {
 			const { statusCode = 400, code, errors } = err;
-			return reply.status(statusCode).send({
-				statusCode,
-				code,
-				message: 'Bad Request',
-				errors,
-			});
+			Object.assign(result, { statusCode, code, message: 'Bad Request', errors });
 		} else if (err instanceof RPCError) {
 			const { code, message } = err;
 			const httpStatusCode = RPC_CODE_TO_HTTP_STATUS_CODE[code] ?? 500;
-
-			return reply.status(httpStatusCode).send({
-				statusCode: httpStatusCode,
-				code,
-				message,
-			});
+			Object.assign(result, { statusCode: httpStatusCode, code, message });
 		}
 
-		return reply.send(err);
+		return reply.status(result.statusCode).send(transformer.stringify(result));
 	});
 
 	done();
