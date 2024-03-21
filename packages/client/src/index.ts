@@ -1,41 +1,5 @@
 import axios from 'axios';
-import type { DataTransformer } from './types';
-
-type HTTPHeaders = Record<string, string[] | string | undefined>;
-type Opts = {
-	url: string;
-	transformer?: DataTransformer;
-	headers?: HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
-};
-
-type InferPromise<T> = T extends Promise<infer U> ? U : T;
-
-type ClientType<T> =
-	T extends Record<string, any>
-		? {
-				[K in keyof T]: T[K] extends {
-					method: infer Method;
-				}
-					? Method extends 'GET'
-						? T[K]['input'] extends Record<string, any>
-							? {
-									get: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-								}
-							: {
-									get: () => Promise<InferPromise<T[K]['output']>>;
-								}
-						: Method extends 'POST'
-							? T[K]['input'] extends Record<string, any>
-								? {
-										post: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-									}
-								: {
-										post: () => Promise<InferPromise<T[K]['output']>>;
-									}
-							: never
-					: ClientType<T[K]>;
-			}
-		: never;
+import type { Opts, ClientType } from './types';
 
 export function createClient<T>(opts?: Opts): ClientType<T> {
 	const { url, transformer = JSON, headers } = opts ?? {};
