@@ -3,6 +3,7 @@ import { createValidatorCompiler, createSerializerCompiler, RequestValidationErr
 import { Endpoint } from './route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Router, DataTransformer } from './types';
+import { RPCError, RPC_CODE_TO_HTTP_STATUS_CODE } from './error';
 
 type FastifyRequestWithCtx = FastifyRequest & {
 	_httpRpcCtx: Record<string, any>;
@@ -74,8 +75,17 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 			return reply.status(statusCode).send({
 				statusCode,
 				code,
-				error: 'Bad Request',
+				message: 'Bad Request',
 				errors,
+			});
+		} else if (err instanceof RPCError) {
+			const { code, message } = err;
+			const httpStatusCode = RPC_CODE_TO_HTTP_STATUS_CODE[code] ?? 500;
+
+			return reply.status(httpStatusCode).send({
+				statusCode: httpStatusCode,
+				code,
+				message,
 			});
 		}
 
