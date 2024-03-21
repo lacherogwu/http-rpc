@@ -1,3 +1,2 @@
-export { Route } from './route';
-export { fastifyRPCPlugin } from './fastify';
+export { createRoute } from './route';
 export { RPCError } from './error';

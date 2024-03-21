@@ -1,13 +1,9 @@
-import type { FastifyRequest, FastifyReply } from 'fastify';
 import z, { ZodType, ZodObject, ZodAny, ZodUnknown } from 'zod';
-import { Prettify } from './types';
+import { Prettify, BaseCtx } from './types';
 
-// TODO: remove fastify dependency
-// change to req & res, and provide to Route<FastifyRequest, FastifyReply> and Ctx<FastifyRequest, FastifyReply> generics
-
-type Ctx<InputSchema = unknown> = {
-	req: FastifyRequest;
-	res: FastifyReply;
+type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
+	req: AdapterContext['req'];
+	res: AdapterContext['res'];
 	input: InputSchema;
 };
 
@@ -39,10 +35,10 @@ export class Endpoint<
 	}
 }
 
-export class Route<InputSchema = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
+export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
 	#input: ZodObject<any>;
 	#output: ZodType;
-	#middlewares: ((ctx: Ctx<InputSchema> & MiddlewareContext) => any)[];
+	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
 		this.#input = data?.input ?? z.unknown();
@@ -77,18 +73,18 @@ export class Route<InputSchema = unknown, OutputSchema extends ZodType = any, Mi
 	}
 
 	input<Schema extends ZodObject<any>>(schema: Schema) {
-		return this.#prepare({ input: schema }) as unknown as Route<Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
+		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
 	}
 
 	output<Schema extends ZodType>(schema: Schema) {
-		return this.#prepare({ output: schema }) as unknown as Route<InputSchema, z.infer<Schema>, MiddlewareContext>;
+		return this.#prepare({ output: schema }) as unknown as Route<AdapterContext, InputSchema, z.infer<Schema>, MiddlewareContext>;
 	}
 
-	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {
-		return this.#prepare({ middleware }) as unknown as Route<InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
+	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+		return this.#prepare({ middleware }) as unknown as Route<AdapterContext, InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 
-	post<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {
+	post<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
 		return new Endpoint({
 			method: 'POST',
 			input: this.#input as InputSchema,
@@ -98,7 +94,7 @@ export class Route<InputSchema = unknown, OutputSchema extends ZodType = any, Mi
 		});
 	}
 
-	get<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<InputSchema> & MiddlewareContext) => T) {
+	get<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
 		return new Endpoint({
 			method: 'GET',
 			input: this.#input as InputSchema,
@@ -107,4 +103,8 @@ export class Route<InputSchema = unknown, OutputSchema extends ZodType = any, Mi
 			middlewares: this.#middlewares,
 		});
 	}
+}
+
+export function createRoute<AdapterContext extends BaseCtx>() {
+	return new Route<AdapterContext>();
 }

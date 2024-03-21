@@ -54,8 +54,10 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		},
 		transformRequest: data => transformer.stringify(data),
 		paramsSerializer: params => `input=${transformer.stringify(params)}`,
-		// TODO: handle empty response
-		transformResponse: data => transformer.parse(data),
+		transformResponse: data => {
+			if (data === '' || data === undefined) return;
+			return transformer.parse(data ?? '');
+		},
 	});
 
 	instance.interceptors.response.use(res => res.data);

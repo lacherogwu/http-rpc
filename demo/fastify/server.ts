@@ -1,4 +1,5 @@
-import { Route, fastifyRPCPlugin, RPCError } from '@http-rpc/server';
+import { createRoute, RPCError } from '@http-rpc/server';
+import { fastifyRPCPlugin, FastifyContext } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -7,7 +8,7 @@ const fastify = Fastify({
 	logger: true,
 });
 
-const publicRoute = new Route();
+const publicRoute = createRoute<FastifyContext>();
 const protectedRoute = publicRoute.middleware(ctx => {
 	const token = ctx.req.headers.authorization;
 	if (!token) {
@@ -41,7 +42,6 @@ const router = {
 					name: z.string(),
 				}),
 			)
-			.output(z.object({ id: z.number(), name: z.string() }))
 			.post(ctx => {
 				const { name } = ctx.input;
 				console.log(`creating user ${name}`);

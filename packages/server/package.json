@@ -1,14 +1,25 @@
 {
 	"name": "@http-rpc/server",
-	"version": "0.0.16",
+	"version": "0.1.0",
 	"description": "HTTP RPC Server",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
 		"dist"
 	],
+	"exports": {
+		".": "./dist/index.js",
+		"./adapters/*": "./dist/adapters/*.js"
+	},
+	"typesVersions": {
+		"*": {
+			"adapters/*": [
+				"dist/adapters/*.d.ts"
+			]
+		}
+	},
 	"scripts": {
-		"build": "rm -rf dist && tsup src/index.ts --format esm --dts",
+		"build": "rm -rf dist && tsup src/index.ts src/adapters/*.ts --format esm --dts",
 		"build:watch": "npm run build -- --watch",
 		"lint": "tsc",
 		"prepublishOnly": "npm run build"

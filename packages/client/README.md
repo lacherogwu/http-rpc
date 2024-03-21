@@ -6,6 +6,12 @@
 npm install @http-rpc/client
 ```
 
+### Recommended Dependencies
+
+```bash
+npm install superjson
+```
+
 ## Usage
 
 `./rpcClient.ts`

@@ -1,9 +1,9 @@
 import fp from 'fastify-plugin';
-import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from './helpers';
-import { Endpoint } from './route';
+import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from '../helpers';
+import { Endpoint } from '../route';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { Router, DataTransformer } from './types';
-import { RPCError, RPC_CODE_TO_HTTP_STATUS_CODE } from './error';
+import type { Router, DataTransformer, BaseCtx } from '../types';
+import { RPCError, RPC_CODE_TO_HTTP_STATUS_CODE } from '../error';
 
 type FastifyRequestWithCtx = FastifyRequest & {
 	_httpRpcCtx: Record<string, any>;
@@ -14,6 +14,8 @@ type FastifyPluginOptions = {
 	prefix?: string;
 	transformer?: DataTransformer;
 };
+
+export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
 
 export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
 	const { prefix, transformer, router } = opts;

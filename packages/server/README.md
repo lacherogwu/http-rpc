@@ -6,12 +6,18 @@
 npm install @http-rpc/server
 ```
 
+### Recommended Dependencies
+
+```bash
+npm install fastify superjson zod
+```
+
 ## Usage
 
 `./app.ts`
 
 ```typescript
-import { fastifyRPCPlugin } from '@http-rpc/server';
+import { fastifyRPCPlugin } from '@http-rpc/server/adapters/fastify';
 import superjson from 'superjson';
 import { router } from './rpc/router';
 
@@ -25,14 +31,15 @@ fastify.register(fastifyRPCPlugin, {
 `./router.ts`
 
 ```typescript
-import { Route } from '@http-rpc/server';
+import { createRoute, RPCError } from '@http-rpc/server';
+import { FastifyContext } from '@http-rpc/server/adapters/fastify';
 import { z } from 'zod';
 
-const publicRoute = new Route();
+const publicRoute = createRoute<FastifyContext>();
 const authenticatedRoute = publicRoute.middleware(ctx => {
 	const { authorization } = ctx.req.headers;
 	const user = await prisma.user.findUnique({ where: { token: authorization } });
-	if (!user) throw new Error('Unauthorized');
+	if (!user) throw new RPCError({ code: 'UNAUTHORIZED' });
 
 	return {
 		userId: user.id,

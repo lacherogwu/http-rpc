@@ -12,3 +12,8 @@ export type Router = {
 export type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & {};
+
+export type BaseCtx<Req = unknown, Res = unknown> = {
+	req: Req;
+	res: Res;
+};
