@@ -1,6 +1,6 @@
 {
 	"name": "@http-rpc/server",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"description": "HTTP RPC Server",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

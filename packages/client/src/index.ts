@@ -10,31 +10,32 @@ type Opts = {
 
 type InferPromise<T> = T extends Promise<infer U> ? U : T;
 
-type ClientType<T> = T extends Record<string, any>
-	? {
-			[K in keyof T]: T[K] extends {
-				method: infer Method;
+type ClientType<T> =
+	T extends Record<string, any>
+		? {
+				[K in keyof T]: T[K] extends {
+					method: infer Method;
+				}
+					? Method extends 'GET'
+						? T[K]['input'] extends Record<string, any>
+							? {
+									get: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
+								}
+							: {
+									get: () => Promise<InferPromise<T[K]['output']>>;
+								}
+						: Method extends 'POST'
+							? T[K]['input'] extends Record<string, any>
+								? {
+										post: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
+									}
+								: {
+										post: () => Promise<InferPromise<T[K]['output']>>;
+									}
+							: never
+					: ClientType<T[K]>;
 			}
-				? Method extends 'GET'
-					? T[K]['input'] extends Record<string, any>
-						? {
-								get: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-						  }
-						: {
-								get: () => Promise<InferPromise<T[K]['output']>>;
-						  }
-					: Method extends 'POST'
-					? T[K]['input'] extends Record<string, any>
-						? {
-								post: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-						  }
-						: {
-								post: () => Promise<InferPromise<T[K]['output']>>;
-						  }
-					: never
-				: ClientType<T[K]>;
-	  }
-	: never;
+		: never;
 
 export function createClient<T>(opts?: Opts): ClientType<T> {
 	const { url, transformer = JSON, headers } = opts ?? {};
@@ -53,6 +54,7 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		},
 		transformRequest: data => transformer.stringify(data),
 		paramsSerializer: params => `input=${transformer.stringify(params)}`,
+		// TODO: handle empty response
 		transformResponse: data => transformer.parse(data),
 	});
 

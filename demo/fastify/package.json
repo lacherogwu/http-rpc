@@ -1,0 +1,26 @@
+{
+	"name": "fastify",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev:server": "tsx watch server.ts",
+		"dev:client": "tsx watch client.ts"
+	},
+	"keywords": [],
+	"author": "LacheRo",
+	"license": "MIT",
+	"type": "module",
+	"devDependencies": {
+		"@types/node": "^20.11.30",
+		"tsx": "^4.7.1",
+		"typescript": "^5.4.3"
+	},
+	"dependencies": {
+		"@http-rpc/client": "link:../../packages/client",
+		"@http-rpc/server": "link:../../packages/server",
+		"fastify": "^4.26.2",
+		"superjson": "^2.2.1",
+		"zod": "^3.22.4"
+	}
+}
