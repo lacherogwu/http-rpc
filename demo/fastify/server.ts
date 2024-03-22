@@ -1,5 +1,5 @@
 import { createRoute, RPCError } from '@http-rpc/server';
-import { fastifyRPCPlugin, FastifyContext } from '@http-rpc/server/adapters/fastify';
+import { FastifyContext, fastifyRPCPlugin } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -53,13 +53,17 @@ const router = {
 				};
 			}),
 		update: publicRoute.get(() => {
-			throw new RPCError({ code: 'NOT_IMPLEMENTED', message: 'Not implemented' });
+			throw new RPCError({
+				code: 'NOT_IMPLEMENTED',
+				message: 'Not implemented',
+			});
 		}),
-		delete: publicRoute.post(() => {
-			console.log('here...');
-			// return { delete: true };
-			return 'deleted';
-		}),
+		delete: publicRoute //
+			.output(z.object({ delete: z.boolean() }))
+			.post(async () => {
+				console.log('here...');
+				return { delete: true };
+			}),
 	},
 };
 

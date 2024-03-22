@@ -1,5 +1,5 @@
-import z, { ZodType, ZodObject, ZodAny, ZodUnknown } from 'zod';
-import { Prettify, BaseCtx } from './types';
+import z, { ZodAny, ZodArray, ZodObject, ZodUnknown } from 'zod';
+import type { BaseCtx, Prettify } from './types';
 
 type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
 	req: AdapterContext['req'];
@@ -35,14 +35,19 @@ export class Endpoint<
 	}
 }
 
-export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
+export class Route<
+	AdapterContext extends BaseCtx,
+	InputSchema = unknown,
+	OutputSchema extends Record<string, unknown> | any[] | void = Record<string, unknown> | any[] | void,
+	MiddlewareContext = {},
+> {
 	#input: ZodObject<any>;
-	#output: ZodType;
+	#output: any;
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
 		this.#input = data?.input ?? z.unknown();
-		this.#output = data?.output ?? z.any();
+		this.#output = data?.output ?? z.union([z.record(z.string(), z.unknown()), z.array(z.unknown()), z.void()]);
 		this.#middlewares = data?.middlewares ?? [];
 	}
 
@@ -76,7 +81,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
 	}
 
-	output<Schema extends ZodType>(schema: Schema) {
+	output<Schema extends ZodObject<any> | ZodArray<any>>(schema: Schema) {
 		return this.#prepare({ output: schema }) as unknown as Route<AdapterContext, InputSchema, z.infer<Schema>, MiddlewareContext>;
 	}
 
@@ -84,7 +89,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		return this.#prepare({ middleware }) as unknown as Route<AdapterContext, InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 
-	post<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	post<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return new Endpoint({
 			method: 'POST',
 			input: this.#input as InputSchema,
@@ -94,7 +99,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		});
 	}
 
-	get<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	get<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return new Endpoint({
 			method: 'GET',
 			input: this.#input as InputSchema,

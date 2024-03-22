@@ -38,7 +38,9 @@ import { z } from 'zod';
 const publicRoute = createRoute<FastifyContext>();
 const authenticatedRoute = publicRoute.middleware(ctx => {
 	const { authorization } = ctx.req.headers;
-	const user = await prisma.user.findUnique({ where: { token: authorization } });
+	const user = await prisma.user.findUnique({
+		where: { token: authorization },
+	});
 	if (!user) throw new RPCError({ code: 'UNAUTHORIZED' });
 
 	return {

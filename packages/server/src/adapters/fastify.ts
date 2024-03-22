@@ -80,7 +80,12 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 		};
 		if (err instanceof RequestValidationError) {
 			const { statusCode = 400, code, errors } = err;
-			Object.assign(result, { statusCode, code, message: 'Bad Request', errors });
+			Object.assign(result, {
+				statusCode,
+				code,
+				message: 'Bad Request',
+				errors,
+			});
 		} else if (err instanceof RPCError) {
 			const { code, message } = err;
 			const httpStatusCode = RPC_CODE_TO_HTTP_STATUS_CODE[code] ?? 500;
