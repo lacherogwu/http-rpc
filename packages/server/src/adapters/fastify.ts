@@ -79,13 +79,13 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	}
 	registerRoutes('', router);
 
-	fastify.setErrorHandler((err, req, reply) => {
-		reply.header('Content-Type', 'application/problem+json');
+	fastify.setErrorHandler((err, req, res) => {
+		res.header('Content-Type', 'application/problem+json');
 		const result = {
 			status: 500,
 			title: err.message ?? 'Internal Server Error',
 			code: 'INTERNAL_SERVER_ERROR',
-			instance: req.url,
+			instance: req.routeOptions.url,
 		} satisfies Record<string, any>;
 
 		if (err instanceof RequestValidationError) {
@@ -110,7 +110,7 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 			Object.assign(result, extensions);
 		}
 
-		return reply.status(result.status).send(JSON.stringify(result));
+		return res.status(result.status).send(JSON.stringify(result));
 	});
 
 	done();
