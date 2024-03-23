@@ -1,4 +1,4 @@
-import z, { ZodAny, ZodArray, ZodObject, ZodUnknown } from 'zod';
+import z, { ZodAny, ZodArray, ZodObject, ZodUnknown, ZodType } from 'zod';
 import type { BaseCtx, Prettify } from './types';
 
 type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
@@ -35,19 +35,14 @@ export class Endpoint<
 	}
 }
 
-export class Route<
-	AdapterContext extends BaseCtx,
-	InputSchema = unknown,
-	OutputSchema extends Record<string, unknown> | any[] | void = Record<string, unknown> | any[] | void,
-	MiddlewareContext = {},
-> {
+export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, OutputSchema = any, MiddlewareContext = {}> {
 	#input: ZodObject<any>;
 	#output: any;
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
 		this.#input = data?.input ?? z.unknown();
-		this.#output = data?.output ?? z.union([z.record(z.string(), z.unknown()), z.array(z.unknown()), z.void()]);
+		this.#output = data?.output ?? z.any();
 		this.#middlewares = data?.middlewares ?? [];
 	}
 
@@ -81,11 +76,11 @@ export class Route<
 		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
 	}
 
-	output<Schema extends ZodObject<any> | ZodArray<any>>(schema: Schema) {
+	output<Schema extends ZodType>(schema: Schema) {
 		return this.#prepare({ output: schema }) as unknown as Route<AdapterContext, InputSchema, z.infer<Schema>, MiddlewareContext>;
 	}
 
-	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	middleware<const T extends Record<string, unknown>>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return this.#prepare({ middleware }) as unknown as Route<AdapterContext, InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 

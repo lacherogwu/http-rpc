@@ -24,20 +24,12 @@ const client = createClient<Router>({
 	},
 });
 
-// const versionData = await client.version.get();
-// console.log(versionData);
-// // versionData is { version: '1.0.0' }
+const versionData = await client.version.get();
+console.log(versionData);
+// versionData is { version: '1.0.0' }
 
-// const users = await client.users.list.get();
-// console.log('🚀 → users:', users);
+const users = await client.users.list.get();
+console.log('🚀 → users:', users);
 
-// const user = await client.users.create.post({ name: 'Charlie' });
-// console.log('🚀 → user:', user);
-
-try {
-	const data = await client.users.delete.post();
-	console.log({ data });
-} catch (err: any) {
-	console.log('err');
-	console.log(JSON.stringify(err.response.data, null, 2));
-}
+const user = await client.users.create.post({ name: 'Charlie' });
+console.log('🚀 → user:', user);

@@ -1,5 +1,7 @@
 # HTTP RPC Server
 
+- Error structure following RFC 9457 [(Problem Details for HTTP APIs)](https://datatracker.ietf.org/doc/html/rfc9457)
+
 ## Installation
 
 ```bash

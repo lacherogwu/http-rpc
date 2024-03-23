@@ -12,7 +12,7 @@ const publicRoute = createRoute<FastifyContext>();
 const protectedRoute = publicRoute.middleware(ctx => {
 	const token = ctx.req.headers.authorization;
 	if (!token) {
-		throw new RPCError({ code: 'UNAUTHORIZED', message: 'Missing token' });
+		throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
 	}
 
 	return {
@@ -42,8 +42,10 @@ const router = {
 					name: z.string(),
 				}),
 			)
+			.output(z.object({ id: z.number(), name: z.string() }))
 			.post(ctx => {
 				const { name } = ctx.input;
+
 				console.log(`creating user ${name}`);
 
 				return {
@@ -55,15 +57,9 @@ const router = {
 		update: publicRoute.get(() => {
 			throw new RPCError({
 				code: 'NOT_IMPLEMENTED',
-				message: 'Not implemented',
+				title: 'Not implemented',
 			});
 		}),
-		delete: publicRoute //
-			.output(z.object({ delete: z.boolean() }))
-			.post(async () => {
-				console.log('here...');
-				return { delete: true };
-			}),
 	},
 };
 

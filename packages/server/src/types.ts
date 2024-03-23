@@ -1,8 +1,8 @@
 import type { Endpoint } from './route';
 
 export type DataTransformer = {
-	parse: (object: any) => any;
-	stringify: (object: any) => any;
+	serialize: (object: any) => any;
+	deserialize: (object: any) => any;
 };
 
 export type Router = {

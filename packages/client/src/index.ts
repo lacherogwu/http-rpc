@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Opts, ClientType } from './types';
 
 export function createClient<T>(opts?: Opts): ClientType<T> {
-	const { url, transformer = JSON, headers, onRequest, onResponse, onError } = opts ?? {};
+	const { url, transformer, headers, onRequest, onResponse, onError } = opts ?? {};
 
 	const getHeaders = async () => {
 		if (typeof headers === 'function') {
@@ -16,11 +16,28 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		transformRequest: data => transformer.stringify(data),
-		paramsSerializer: params => `input=${transformer.stringify(params)}`,
-		transformResponse: data => {
-			if (data === '' || data === undefined) return;
-			return transformer.parse(data ?? '');
+		transformRequest: input => {
+			let data = input;
+			if (transformer) {
+				data = transformer.serialize(data);
+			}
+			return JSON.stringify(data ?? '{}');
+		},
+		paramsSerializer: input => {
+			let data = input;
+			if (transformer) {
+				data = transformer.serialize(data);
+			}
+			return `input=${JSON.stringify(data)}`;
+		},
+		transformResponse: (responseAsString: string, _headers, status) => {
+			if (status !== 200) return JSON.parse(responseAsString);
+			const response: { data: any } = JSON.parse(responseAsString);
+			let data = response.data;
+			if (transformer) {
+				data = transformer.deserialize(data);
+			}
+			return data;
 		},
 	});
 
