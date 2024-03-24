@@ -1,4 +1,4 @@
-import z, { ZodAny, ZodObject, ZodUnknown, ZodType, ZodOptional } from 'zod';
+import z, { ZodAny, ZodObject, ZodType, ZodOptional } from 'zod';
 import type { BaseCtx, Prettify } from './types';
 
 type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
@@ -43,7 +43,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
-		this.#input = data?.input ?? z.unknown();
+		this.#input = data?.input ?? z.any();
 		this.#output = data?.output ?? z.any();
 		this.#middlewares = data?.middlewares ?? [];
 	}
@@ -52,13 +52,13 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		return schema?._def?.typeName === 'ZodObject';
 	}
 
-	#isZodUnknown(schema?: ZodAny | ZodObject<any> | ZodUnknown): schema is ZodUnknown {
-		return schema?._def?.typeName === 'ZodUnknown';
+	#isZodAny(schema?: ZodAny | ZodObject<any>): schema is ZodAny {
+		return schema?._def?.typeName === 'ZodAny';
 	}
 
 	#prepare(data: any) {
 		let input = this.#input;
-		if (this.#isZodUnknown(input)) {
+		if (this.#isZodAny(input)) {
 			input = data.input;
 		} else if (this.#isZodObject(input) && this.#isZodObject(data.input)) {
 			input = input.merge(data.input);
