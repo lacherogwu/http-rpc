@@ -21,25 +21,19 @@ export type ClientType<T> =
 	T extends Record<string, any>
 		? {
 				[K in keyof T]: T[K] extends {
-					method: infer Method;
+					method: infer M;
+					input?: unknown;
+					output?: unknown;
 				}
-					? Method extends 'GET'
-						? T[K]['input'] extends Record<string, any> | undefined
-							? {
-									get: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-								}
-							: {
-									get: () => Promise<InferPromise<T[K]['output']>>;
-								}
-						: Method extends 'POST'
-							? T[K]['input'] extends Record<string, any> | undefined
-								? {
-										post: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
-									}
-								: {
-										post: () => Promise<InferPromise<T[K]['output']>>;
-									}
-							: never
+					? M extends 'GET' | 'POST'
+						? {
+								[P in M as Lowercase<P>]: [T[K]['input']] extends [never] //
+									? () => T[K]['output']
+									: [Required<T[K]['input']>] extends [{}]
+										? (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>
+										: (input?: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
+							}
+						: never
 					: ClientType<T[K]>;
 			}
 		: never;

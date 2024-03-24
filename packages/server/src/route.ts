@@ -7,6 +7,8 @@ type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
 	input: InputSchema;
 };
 
+type NeverHelper<T, U> = [T] extends [never] ? U : T & U;
+
 export class Endpoint<
 	Input extends {
 		method: 'GET' | 'POST';
@@ -35,7 +37,7 @@ export class Endpoint<
 	}
 }
 
-export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, OutputSchema = any, MiddlewareContext = {}> {
+export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSchema = any, MiddlewareContext = {}> {
 	#input: ZodObject<any>;
 	#output: any;
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
@@ -73,7 +75,12 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 	}
 
 	input<Schema extends ZodObject<any> | ZodOptional<ZodObject<any>>>(schema: Schema) {
-		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
+		return this.#prepare({ input: schema }) as unknown as Route<
+			AdapterContext,
+			Prettify<NeverHelper<InputSchema, z.infer<Schema>>>,
+			OutputSchema,
+			MiddlewareContext
+		>;
 	}
 
 	output<Schema extends ZodType>(schema: Schema) {
