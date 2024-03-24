@@ -24,7 +24,7 @@ export type ClientType<T> =
 					method: infer Method;
 				}
 					? Method extends 'GET'
-						? T[K]['input'] extends Record<string, any>
+						? T[K]['input'] extends Record<string, any> | undefined
 							? {
 									get: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
 								}
@@ -32,7 +32,7 @@ export type ClientType<T> =
 									get: () => Promise<InferPromise<T[K]['output']>>;
 								}
 						: Method extends 'POST'
-							? T[K]['input'] extends Record<string, any>
+							? T[K]['input'] extends Record<string, any> | undefined
 								? {
 										post: (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
 									}

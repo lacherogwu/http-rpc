@@ -1,6 +1,6 @@
 {
 	"name": "@http-rpc/client",
-	"version": "0.2.6",
+	"version": "0.2.7",
 	"description": "HTTP RPC Client",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
