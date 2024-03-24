@@ -18,7 +18,7 @@ type FastifyPluginOptions = {
 
 export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
 
-export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
+export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 	const { prefix, transformer, router } = opts;
 
 	fastify.setValidatorCompiler(createValidatorCompiler(transformer));

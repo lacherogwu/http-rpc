@@ -1,2 +1,2 @@
-export { createRoute } from './route';
+export { createRoute, Endpoint } from './route';
 export { RPCError } from './error';
