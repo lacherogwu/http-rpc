@@ -5,13 +5,13 @@
 ## Installation
 
 ```bash
-npm install @http-rpc/server
+npm install @http-rpc/server zod
 ```
 
 ### Recommended Dependencies
 
 ```bash
-npm install fastify superjson zod
+npm install fastify superjson
 ```
 
 ## Usage

@@ -28,7 +28,7 @@ export type ClientType<T> =
 					? M extends 'GET' | 'POST'
 						? {
 								[P in M as Lowercase<P>]: [T[K]['input']] extends [never] //
-									? () => T[K]['output']
+									? () => Promise<InferPromise<T[K]['output']>>
 									: [Required<T[K]['input']>] extends [{}]
 										? (input: T[K]['input']) => Promise<InferPromise<T[K]['output']>>
 										: (input?: T[K]['input']) => Promise<InferPromise<T[K]['output']>>;
