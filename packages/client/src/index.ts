@@ -51,17 +51,15 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 	});
 	instance.interceptors.response.use(res => res.data);
 
-	let path: string[] = [];
 	const handler = {
-		get(_target: any, prop: string): any {
-			path.push(prop);
-			return new Proxy(() => {}, handler);
+		get(target: any, prop: string): any {
+			return new Proxy(() => target().concat(prop), handler);
 		},
-		async apply(_target: any, _thisArg: any, args: any[]) {
+		async apply(target: any, _thisArg: any, args: any[]) {
+			const path = target();
 			const [input] = args;
 			const method = path.pop();
 			const urlPath = path.join('/');
-			path = [];
 
 			const request: Record<string, any> = {
 				method,
@@ -78,5 +76,5 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 			return instance(request);
 		},
 	};
-	return new Proxy(() => {}, handler);
+	return new Proxy(() => [], handler);
 }

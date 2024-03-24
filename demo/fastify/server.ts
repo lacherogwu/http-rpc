@@ -1,5 +1,5 @@
 import { createRoute, RPCError } from '@http-rpc/server';
-import { FastifyContext, fastifyRPCPlugin } from '@http-rpc/server/adapters/fastify';
+import { FastifyContext, rpcFastify } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -65,7 +65,7 @@ const router = {
 
 export type Router = typeof router;
 
-fastify.register(fastifyRPCPlugin, {
+fastify.register(rpcFastify, {
 	prefix: '/rpc',
 	router,
 	transformer: superjson,
