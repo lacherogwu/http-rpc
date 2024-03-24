@@ -71,8 +71,8 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 	return createInnerProxy(async ({ path, args }) => {
 		// MAYBE: accept extra options in second arg, like headers, etc.
 		const [input] = args;
-		const method = path.pop();
-		const urlPath = path.join('/');
+		const method = path.at(-1);
+		const urlPath = path.slice(0, -1).join('/');
 
 		const request: Record<string, any> = {
 			method,
