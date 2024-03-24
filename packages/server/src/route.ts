@@ -1,4 +1,4 @@
-import z, { ZodAny, ZodArray, ZodObject, ZodUnknown, ZodType } from 'zod';
+import z, { ZodAny, ZodObject, ZodUnknown, ZodType, ZodOptional } from 'zod';
 import type { BaseCtx, Prettify } from './types';
 
 type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
@@ -72,7 +72,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		});
 	}
 
-	input<Schema extends ZodObject<any>>(schema: Schema) {
+	input<Schema extends ZodObject<any> | ZodOptional<ZodObject<any>>>(schema: Schema) {
 		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
 	}
 
