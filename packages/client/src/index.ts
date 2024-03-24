@@ -1,6 +1,23 @@
 import axios from 'axios';
 import type { Opts, ClientType } from './types';
 
+type ProxyCallbackOpts = {
+	path: string[];
+	args: unknown[];
+};
+type ProxyCallback = (opts: ProxyCallbackOpts) => unknown;
+
+function createInnerProxy(callback: ProxyCallback, path: string[] = []): any {
+	return new Proxy(() => {}, {
+		get(_target, prop: string): any {
+			return createInnerProxy(callback, path.concat(prop));
+		},
+		async apply(_target, _thisArg, args) {
+			return await callback({ path, args });
+		},
+	});
+}
+
 export function createClient<T>(opts?: Opts): ClientType<T> {
 	const { url, transformer, headers, onRequest, onResponse, onError } = opts ?? {};
 
@@ -51,30 +68,24 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 	});
 	instance.interceptors.response.use(res => res.data);
 
-	const handler = {
-		get(target: any, prop: string): any {
-			return new Proxy(() => target().concat(prop), handler);
-		},
-		async apply(target: any, _thisArg: any, args: any[]) {
-			const path = target();
-			const [input] = args;
-			const method = path.pop();
-			const urlPath = path.join('/');
+	return createInnerProxy(async ({ path, args }) => {
+		// MAYBE: accept extra options in second arg, like headers, etc.
+		const [input] = args;
+		const method = path.pop();
+		const urlPath = path.join('/');
 
-			const request: Record<string, any> = {
-				method,
-				url: `/${urlPath}`,
-				headers: await getHeaders(),
-			};
+		const request: Record<string, any> = {
+			method,
+			headers: await getHeaders(),
+			url: `/${urlPath}`,
+		};
 
-			if (method === 'get') {
-				request.params = input;
-			} else if (method === 'post') {
-				request.data = input;
-			}
+		if (method === 'get') {
+			request.params = input;
+		} else if (method === 'post') {
+			request.data = input;
+		}
 
-			return instance(request);
-		},
-	};
-	return new Proxy(() => [], handler);
+		return instance(request);
+	});
 }
