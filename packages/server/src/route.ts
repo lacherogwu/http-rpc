@@ -87,7 +87,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		return this.#prepare({ output: schema }) as unknown as Route<AdapterContext, InputSchema, z.infer<Schema>, MiddlewareContext>;
 	}
 
-	middleware<const T extends Record<string, unknown>>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | void | Promise<T | void>) {
+	middleware<const T extends Record<string, unknown> | void>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return this.#prepare({ middleware }) as unknown as Route<AdapterContext, InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 
