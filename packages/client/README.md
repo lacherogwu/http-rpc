@@ -1,15 +1,13 @@
 # HTTP RPC Client
 
+## Documentation
+
+Full documentation can be found [here](https://lacherogwu.github.io/http-rpc/).
+
 ## Installation
 
 ```bash
-npm install @http-rpc/client
-```
-
-### Recommended Dependencies
-
-```bash
-npm install superjson
+npm install @http-rpc/client superjson
 ```
 
 ## Usage
@@ -51,8 +49,8 @@ export const client = createClient<Router>({
 import { client } from './rpcClient';
 
 const version = await client.version.get();
-// { version: '1.0.0' }
+//    ^? { version: string }
 
 const orders = await client.orders.list({ fields: ['id', 'amount'] });
-// [{ id: 1, amount: 100 }, { id: 2, amount: 200 }]
+//    ^? { id: number, amount: number }[]
 ```

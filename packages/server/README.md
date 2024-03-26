@@ -1,17 +1,13 @@
 # HTTP RPC Server
 
-- Error structure following RFC 9457 [(Problem Details for HTTP APIs)](https://datatracker.ietf.org/doc/html/rfc9457)
+## Documentation
+
+Full documentation can be found [here](https://lacherogwu.github.io/http-rpc/).
 
 ## Installation
 
 ```bash
-npm install @http-rpc/server zod
-```
-
-### Recommended Dependencies
-
-```bash
-npm install fastify superjson
+npm install @http-rpc/server zod fastify superjson
 ```
 
 ## Usage
