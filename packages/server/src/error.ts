@@ -22,7 +22,9 @@ type RPC_ERROR_CODE_KEY = keyof typeof RPC_CODE_TO_HTTP_STATUS_CODE;
 export class RPCError extends Error {
 	public readonly code;
 
-	constructor(opts: { message?: string; code: RPC_ERROR_CODE_KEY; cause?: unknown }) {
+	constructor(opts: {
+		message?: string; code: RPC_ERROR_CODE_KEY; cause?: unknown
+	}) {
 		const message = opts.message ?? opts.code;
 
 		super(message);

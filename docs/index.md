@@ -6,10 +6,11 @@ hero:
   name: '@http-rpc'
   text: 'Unify Frontend-Backend Interactions'
   tagline: RPC layer on top of http with full typesafety and more
+  image: /logo.png
   actions:
     - theme: brand
       text: Get Started
-      link: /get-started
+      link: /introduction
     - theme: alt
       text: View on Github
       link: https://github.com/lacherogwu/http-rpc
@@ -18,6 +19,7 @@ features:
   - icon: 🔗
     title: Unified Communication
     details: Seamlessly bridges frontend and backend applications, creating a harmonized communication environment
+    link: /configuration-options/#output-format
   - icon: ⚓
     title: RPC over HTTP Protocol
     details: Utilizes the well-established HTTP protocol to deliver robust Remote Procedure Call (RPC) capabilities
@@ -34,3 +36,50 @@ features:
     title: Efficient Error Handling
     details: Following Problem Details for HTTP APIs (RFC 9457)
 ---
+
+## @http-rpc/server
+
+a simple example of how to use `@http-rpc/server` with `fastify`:
+
+```ts
+import Fastify from 'fastify';
+import { createRoute } from '@http-rpc/server';
+import { rpcFastify, FastifyContext } from '@http-rpc/server/adapters/fastify';
+
+const fastify = Fastify({
+	logger: true,
+});
+
+const publicRoute = createRoute<FastifyContext>();
+
+const router = {
+	version: publicRoute.get(() => {
+		return { version: 'v1.0.0' };
+	}),
+};
+
+export type Router = typeof router;
+
+fastify.register(rpcFastify, {
+	prefix: '/rpc',
+	router,
+});
+
+await fastify.listen({ port: 3000, host: '0.0.0.0' });
+```
+
+## @http-rpc/client
+
+a simple example of how to use `@http-rpc/client`:
+
+```ts
+import { createClient } from '@http-rpc/client';
+import type { Router } from './server';
+
+const client = createClient<Router>({
+	url: 'http://localhost:3000/rpc',
+});
+
+const versionData = await client.version.get();
+//    ^? { version: string }
+```

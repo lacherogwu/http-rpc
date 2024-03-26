@@ -1,5 +1,5 @@
 import { createRoute, RPCError } from '@http-rpc/server';
-import { fastifyRPCPlugin, FastifyContext } from '@http-rpc/server/adapters/fastify';
+import { rpcFastify, FastifyContext } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ const publicRoute = createRoute<FastifyContext>();
 const protectedRoute = publicRoute.middleware(ctx => {
 	const token = ctx.req.headers.authorization;
 	if (!token) {
-		throw new RPCError({ code: 'UNAUTHORIZED', message: 'Missing token' });
+		throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
 	}
 
 	return {
@@ -57,7 +57,7 @@ const router = {
 
 export type Router = typeof router;
 
-fastify.register(fastifyRPCPlugin, {
+fastify.register(rpcFastify, {
 	prefix: '/rpc',
 	router,
 	transformer: superjson,
