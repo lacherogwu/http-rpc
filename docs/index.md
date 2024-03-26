@@ -41,7 +41,9 @@ features:
 
 a simple example of how to use `@http-rpc/server` with `fastify`:
 
-```ts
+::: code-group
+
+```ts [server.ts]
 import Fastify from 'fastify';
 import { createRoute } from '@http-rpc/server';
 import { rpcFastify, FastifyContext } from '@http-rpc/server/adapters/fastify';
@@ -68,11 +70,15 @@ fastify.register(rpcFastify, {
 await fastify.listen({ port: 3000, host: '0.0.0.0' });
 ```
 
+:::
+
 ## @http-rpc/client
 
 a simple example of how to use `@http-rpc/client`:
 
-```ts
+::: code-group
+
+```ts [client.ts]
 import { createClient } from '@http-rpc/client';
 import type { Router } from './server';
 
@@ -83,3 +89,5 @@ const client = createClient<Router>({
 const versionData = await client.version.get();
 //    ^? { version: string }
 ```
+
+:::

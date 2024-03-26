@@ -25,3 +25,7 @@ export const client = createClient<Router>({
 
 - `url`: The URL of the server.
 - `transformer?`: A function that transforms the request and response.
+- `headers?`: An object or a function that returns headers to be sent with every request.
+- `onRequest?`: A function that is called before every request.
+- `onResponse?`: A function that is called after every response.
+- `onError?`: A function that is called when an error occurs.

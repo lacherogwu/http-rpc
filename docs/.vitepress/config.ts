@@ -36,8 +36,8 @@ export default defineConfig({
             text: 'Concepts'
           },
           {
-            link: '/examples',
-            text: 'Examples'
+            link: '/demo',
+            text: 'Demo'
           }
         ],
       },
@@ -64,6 +64,10 @@ export default defineConfig({
             link: '/backend-usage/errors',
             text: 'Errors'
           },
+          {
+            link: '/backend-usage/best-practice',
+            text: 'Best Practice'
+          },
         ],
       },
       {
@@ -72,6 +76,10 @@ export default defineConfig({
           {
             link: '/client-usage/create-client',
             text: 'Create Client'
+          },
+          {
+            link: '/client-usage/best-practice',
+            text: 'Best Practice'
           },
         ],
       }

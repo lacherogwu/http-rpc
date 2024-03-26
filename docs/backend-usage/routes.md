@@ -12,8 +12,9 @@ Endpoints are applied to routes.
 
 ## How to Create a Route
 
-```ts
-// route.ts
+::: code-group
+
+```ts [route.ts]
 import { createRoute, RPCError } from '@http-rpc/server';
 import { FastifyContext } from '@http-rpc/server/adapters/fastify';
 
@@ -31,5 +32,7 @@ export const protectedRoute = publicRoute.middleware(async ctx => {
 	return { user };
 });
 ```
+
+:::
 
 Continue to the Endpoint section to see how to apply these routes.

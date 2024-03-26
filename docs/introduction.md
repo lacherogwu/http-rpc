@@ -21,8 +21,9 @@ npm install @http-rpc/server @http-rpc/client zod
 First, set up a server using `fastify`. We are currently expanding to support additional frameworks.
 
 then add our server adapter:
+::: code-group
 
-```ts
+```ts [server.ts]
 import Fastify from 'fastify';
 import { rpcFastify, FastifyContext } from '@http-rpc/server/adapters/fastify';
 import { createRoute } from '@http-rpc/server';
@@ -51,9 +52,13 @@ fastify.register(rpcFastify, {
 await fastify.listen({ port: 3000, host: '0.0.0.0' });
 ```
 
+:::
+
 Then setup the client:
 
-```ts
+::: code-group
+
+```ts [client.ts]
 import { createClient } from '@http-rpc/client';
 import type { Router } from './server';
 
@@ -64,6 +69,8 @@ const client = createClient<Router>({
 const versionData = await client.version.get();
 //    ^? { version: string }
 ```
+
+:::
 
 ## The Why
 
