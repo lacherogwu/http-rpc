@@ -8,6 +8,7 @@ export default defineConfig({
     ['link', { href: '/logo.png', rel: 'icon', type: 'image/png' }],
 
   ],
+  base: '/http-rpc/',
   cleanUrls: true,
   themeConfig: {
     logo: '/logo.png',
