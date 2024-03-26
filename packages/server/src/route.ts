@@ -1,11 +1,13 @@
-import z, { ZodType, ZodObject, ZodAny, ZodUnknown } from 'zod';
-import { Prettify, BaseCtx } from './types';
+import z, { ZodAny, ZodObject, ZodType, ZodOptional } from 'zod';
+import type { BaseCtx, Prettify } from './types';
 
 type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
 	req: AdapterContext['req'];
 	res: AdapterContext['res'];
 	input: InputSchema;
 };
+
+type NeverHelper<T, U> = [T] extends [never] ? U : T & U;
 
 export class Endpoint<
 	Input extends {
@@ -35,13 +37,13 @@ export class Endpoint<
 	}
 }
 
-export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, OutputSchema extends ZodType = any, MiddlewareContext = {}> {
+export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSchema = any, MiddlewareContext = {}> {
 	#input: ZodObject<any>;
-	#output: ZodType;
+	#output: any;
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
-		this.#input = data?.input ?? z.unknown();
+		this.#input = data?.input ?? z.any();
 		this.#output = data?.output ?? z.any();
 		this.#middlewares = data?.middlewares ?? [];
 	}
@@ -50,13 +52,13 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		return schema?._def?.typeName === 'ZodObject';
 	}
 
-	#isZodUnknown(schema?: ZodAny | ZodObject<any> | ZodUnknown): schema is ZodUnknown {
-		return schema?._def?.typeName === 'ZodUnknown';
+	#isZodAny(schema?: ZodAny | ZodObject<any>): schema is ZodAny {
+		return schema?._def?.typeName === 'ZodAny';
 	}
 
 	#prepare(data: any) {
 		let input = this.#input;
-		if (this.#isZodUnknown(input)) {
+		if (this.#isZodAny(input)) {
 			input = data.input;
 		} else if (this.#isZodObject(input) && this.#isZodObject(data.input)) {
 			input = input.merge(data.input);
@@ -72,19 +74,24 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		});
 	}
 
-	input<Schema extends ZodObject<any>>(schema: Schema) {
-		return this.#prepare({ input: schema }) as unknown as Route<AdapterContext, Prettify<InputSchema & z.infer<Schema>>, OutputSchema, MiddlewareContext>;
+	input<Schema extends ZodObject<any> | ZodOptional<ZodObject<any>>>(schema: Schema) {
+		return this.#prepare({ input: schema }) as unknown as Route<
+			AdapterContext,
+			Prettify<NeverHelper<InputSchema, z.infer<Schema>>>,
+			OutputSchema,
+			MiddlewareContext
+		>;
 	}
 
 	output<Schema extends ZodType>(schema: Schema) {
 		return this.#prepare({ output: schema }) as unknown as Route<AdapterContext, InputSchema, z.infer<Schema>, MiddlewareContext>;
 	}
 
-	middleware<const T extends Record<string, any> | void>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	middleware<const T extends Record<string, unknown> | void>(middleware: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return this.#prepare({ middleware }) as unknown as Route<AdapterContext, InputSchema, OutputSchema, Prettify<MiddlewareContext & Awaited<T>>>;
 	}
 
-	post<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	post<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return new Endpoint({
 			method: 'POST',
 			input: this.#input as InputSchema,
@@ -94,7 +101,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = unknown, Output
 		});
 	}
 
-	get<T extends OutputSchema | Promise<OutputSchema>>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T) {
+	get<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return new Endpoint({
 			method: 'GET',
 			input: this.#input as InputSchema,

@@ -1,7 +1,8 @@
 import fp from 'fastify-plugin';
-import { createValidatorCompiler, createSerializerCompiler, RequestValidationError } from '../helpers';
 import { Endpoint } from '../route';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest, FastifySchemaCompiler } from 'fastify';
+import type { FastifySerializerCompiler } from 'fastify/types/schema';
+import type { ZodAny, ZodError } from 'zod';
 import type { Router, DataTransformer, BaseCtx } from '../types';
 import { RPCError, RPC_CODE_TO_HTTP_STATUS_CODE } from '../error';
 
@@ -17,7 +18,7 @@ type FastifyPluginOptions = {
 
 export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
 
-export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) => {
+export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 	const { prefix, transformer, router } = opts;
 
 	fastify.setValidatorCompiler(createValidatorCompiler(transformer));
@@ -41,15 +42,22 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 				});
 			}
 
-			const handler = async (request: FastifyRequestWithCtx) => {
-				return route.handler(request._httpRpcCtx);
+			function attachCtx(req: FastifyRequestWithCtx, res: FastifyReply) {
+				if (!req._httpRpcCtx) req._httpRpcCtx = { req, res, input: req.body ?? req.query };
+				return req._httpRpcCtx;
+			}
+
+			const handler = async (req: FastifyRequestWithCtx, res: FastifyReply) => {
+				const ctx = attachCtx(req, res);
+				const data = await route.handler(ctx);
+				return { data };
 			};
 
 			const preHandlerWrapper = (cb: any) => {
 				return async (req: FastifyRequestWithCtx, res: FastifyReply) => {
-					if (!req._httpRpcCtx) req._httpRpcCtx = { req, res, input: req.body ?? req.query };
-					const result = await cb(req._httpRpcCtx);
-					Object.assign(req._httpRpcCtx, result);
+					const ctx = attachCtx(req, res);
+					const result = await cb(ctx);
+					Object.assign(ctx, result);
 				};
 			};
 
@@ -59,7 +67,7 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 				// @ts-ignore
 				preHandler: route.middlewares.map(preHandlerWrapper),
 				// @ts-ignore
-				handler: handler,
+				handler,
 				schema,
 			});
 		} else {
@@ -71,28 +79,99 @@ export const fastifyRPCPlugin = fp<FastifyPluginOptions>((fastify, opts, done) =
 	}
 	registerRoutes('', router);
 
-	fastify.setErrorHandler((err, _request, reply) => {
+	fastify.setErrorHandler((err, req, res) => {
+		res.header('Content-Type', 'application/problem+json');
+		const result = {
+			status: 500,
+			title: err.message ?? 'Internal Server Error',
+			code: 'INTERNAL_SERVER_ERROR',
+			instance: req.routeOptions.url,
+		} satisfies Record<string, any>;
+
 		if (err instanceof RequestValidationError) {
 			const { statusCode = 400, code, errors } = err;
-			return reply.status(statusCode).send({
-				statusCode,
+			Object.assign(result, {
+				status: statusCode,
+				title: 'Bad Request',
+				detail: 'Request validation failed',
 				code,
-				message: 'Bad Request',
 				errors,
 			});
 		} else if (err instanceof RPCError) {
-			const { code, message } = err;
+			const { type, title, detail, code, extensions } = err;
 			const httpStatusCode = RPC_CODE_TO_HTTP_STATUS_CODE[code] ?? 500;
-
-			return reply.status(httpStatusCode).send({
-				statusCode: httpStatusCode,
+			Object.assign(result, {
+				status: httpStatusCode,
+				type,
+				title,
+				detail,
 				code,
-				message,
 			});
+			Object.assign(result, extensions);
 		}
 
-		return reply.send(err);
+		return res.status(result.status).send(JSON.stringify(result));
 	});
 
 	done();
 });
+
+class RequestValidationError extends Error {
+	errors: ZodError['errors'];
+	constructor(err: ZodError) {
+		super("Request doesn't match the schema");
+		this.name = 'RequestValidationError';
+		this.errors = err.errors;
+	}
+}
+
+class ResponseValidationError extends Error {
+	errors: ZodError['errors'];
+
+	constructor(error: ZodError) {
+		super("Response doesn't match the schema");
+		this.name = 'ResponseValidationError';
+		this.errors = error.errors;
+	}
+}
+
+const createValidatorCompiler = (transformer?: DataTransformer) => {
+	const validatorCompiler: FastifySchemaCompiler<ZodAny> = ({ schema, method }) => {
+		return data => {
+			if (method === 'GET') {
+				data = JSON.parse(data.input ?? '{}');
+			}
+
+			if (transformer) {
+				data = transformer.deserialize(data);
+			}
+
+			try {
+				return { value: schema.parse(data) };
+			} catch (err: any) {
+				return { error: new RequestValidationError(err) };
+			}
+		};
+	};
+
+	return validatorCompiler;
+};
+const createSerializerCompiler = (transformer?: DataTransformer) => {
+	const serializerCompiler: FastifySerializerCompiler<ZodAny> =
+		({ schema }) =>
+		({ data }) => {
+			const parsedResult = schema.safeParse(data);
+
+			if (parsedResult.success) {
+				let output = parsedResult.data;
+				if (transformer) {
+					output = transformer.serialize(output);
+				}
+				return JSON.stringify({ data: output });
+			}
+
+			throw new ResponseValidationError(parsedResult.error);
+		};
+
+	return serializerCompiler;
+};

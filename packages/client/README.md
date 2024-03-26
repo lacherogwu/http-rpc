@@ -31,6 +31,19 @@ export const client = createClient<Router>({
 			Authorization: `Bearer ${token}`,
 		};
 	},
+	/* Optional hooks */
+	onRequest(req) {
+		console.log(`${req.method?.toUpperCase() ?? 'Unknown'} ${req.url}`);
+		return req;
+	},
+	onResponse(res) {
+		console.log(`${res.status} ${res.statusText}`);
+		return res;
+	},
+	onError(err) {
+		console.error(err);
+		return err;
+	},
 });
 ```
 

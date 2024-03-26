@@ -1,5 +1,5 @@
 import { createRoute, RPCError } from '@http-rpc/server';
-import { rpcFastify, FastifyContext } from '@http-rpc/server/adapters/fastify';
+import { FastifyContext, rpcFastify } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -42,8 +42,10 @@ const router = {
 					name: z.string(),
 				}),
 			)
+			.output(z.object({ id: z.number(), name: z.string() }))
 			.post(ctx => {
 				const { name } = ctx.input;
+
 				console.log(`creating user ${name}`);
 
 				return {
@@ -52,6 +54,12 @@ const router = {
 					password: '123456', // will not be returned because of the output schema
 				};
 			}),
+		update: publicRoute.get(() => {
+			throw new RPCError({
+				code: 'NOT_IMPLEMENTED',
+				title: 'Not implemented',
+			});
+		}),
 	},
 };
 

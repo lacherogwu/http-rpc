@@ -1,15 +1,17 @@
 # HTTP RPC Server
 
+- Error structure following RFC 9457 [(Problem Details for HTTP APIs)](https://datatracker.ietf.org/doc/html/rfc9457)
+
 ## Installation
 
 ```bash
-npm install @http-rpc/server
+npm install @http-rpc/server zod
 ```
 
 ### Recommended Dependencies
 
 ```bash
-npm install fastify superjson zod
+npm install fastify superjson
 ```
 
 ## Usage
@@ -38,7 +40,9 @@ import { z } from 'zod';
 const publicRoute = createRoute<FastifyContext>();
 const authenticatedRoute = publicRoute.middleware(ctx => {
 	const { authorization } = ctx.req.headers;
-	const user = await prisma.user.findUnique({ where: { token: authorization } });
+	const user = await prisma.user.findUnique({
+		where: { token: authorization },
+	});
 	if (!user) throw new RPCError({ code: 'UNAUTHORIZED' });
 
 	return {

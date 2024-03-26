@@ -1,8 +1,25 @@
 import axios from 'axios';
 import type { Opts, ClientType } from './types';
 
+type ProxyCallbackOpts = {
+	path: string[];
+	args: unknown[];
+};
+type ProxyCallback = (opts: ProxyCallbackOpts) => unknown;
+
+function createInnerProxy(callback: ProxyCallback, path: string[] = []): any {
+	return new Proxy(() => {}, {
+		get(_target, prop: string): any {
+			return createInnerProxy(callback, path.concat(prop));
+		},
+		async apply(_target, _thisArg, args) {
+			return await callback({ path, args });
+		},
+	});
+}
+
 export function createClient<T>(opts?: Opts): ClientType<T> {
-	const { url, transformer = JSON, headers } = opts ?? {};
+	const { url, transformer, headers, onRequest, onResponse, onError } = opts ?? {};
 
 	const getHeaders = async () => {
 		if (typeof headers === 'function') {
@@ -16,42 +33,59 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		transformRequest: data => transformer.stringify(data),
-		paramsSerializer: params => `input=${transformer.stringify(params)}`,
-		transformResponse: data => {
-			if (data === '' || data === undefined) return;
-			return transformer.parse(data ?? '');
+		transformRequest: input => {
+			let data = input;
+			if (transformer) {
+				data = transformer.serialize(data);
+			}
+			return JSON.stringify(data ?? '{}');
+		},
+		paramsSerializer: input => {
+			let data = input;
+			if (transformer) {
+				data = transformer.serialize(data);
+			}
+			return `input=${JSON.stringify(data)}`;
+		},
+		transformResponse: (responseAsString: string, _headers, status) => {
+			if (status !== 200) return JSON.parse(responseAsString);
+			const response: { data: any } = JSON.parse(responseAsString);
+			let data = response.data;
+			if (transformer) {
+				data = transformer.deserialize(data);
+			}
+			return data;
 		},
 	});
 
+	instance.interceptors.request.use(onRequest);
+	instance.interceptors.response.use(onResponse, async err => {
+		if (onError) {
+			const error = await onError(err);
+			return Promise.reject(error);
+		}
+		return Promise.reject(err);
+	});
 	instance.interceptors.response.use(res => res.data);
 
-	let path: string[] = [];
-	const handler = {
-		get(_target: any, prop: string): any {
-			path.push(prop);
-			return new Proxy(() => {}, handler);
-		},
-		async apply(_target: any, _thisArg: any, args: any[]) {
-			const [input] = args;
-			const method = path.pop();
-			const urlPath = path.join('/');
-			path = [];
+	return createInnerProxy(async ({ path, args }) => {
+		// MAYBE: accept extra options in second arg, like headers, etc.
+		const [input] = args;
+		const method = path.at(-1);
+		const urlPath = path.slice(0, -1).join('/');
 
-			const request: Record<string, any> = {
-				method,
-				url: `/${urlPath}`,
-				headers: await getHeaders(),
-			};
+		const request: Record<string, any> = {
+			method,
+			headers: await getHeaders(),
+			url: `/${urlPath}`,
+		};
 
-			if (method === 'get') {
-				request.params = input;
-			} else if (method === 'post') {
-				request.data = input;
-			}
+		if (method === 'get') {
+			request.params = input;
+		} else if (method === 'post') {
+			request.data = input;
+		}
 
-			return instance(request);
-		},
-	};
-	return new Proxy(() => {}, handler);
+		return instance(request);
+	});
 }

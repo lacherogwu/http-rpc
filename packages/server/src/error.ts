@@ -19,17 +19,35 @@ export const RPC_CODE_TO_HTTP_STATUS_CODE = {
 
 type RPC_ERROR_CODE_KEY = keyof typeof RPC_CODE_TO_HTTP_STATUS_CODE;
 
+type ErrorOpts = {
+	code: RPC_ERROR_CODE_KEY;
+	type?: string;
+	title?: string;
+	detail?: string;
+	extensions?: Record<string, any>;
+	cause?: unknown;
+};
+
+/**
+ * Follwoing the Problem Details for HTTP APIs specification RFC 9457 (https://datatracker.ietf.org/doc/html/rfc9457)
+ */
 export class RPCError extends Error {
 	public readonly code;
+	public readonly type;
+	public readonly title;
+	public readonly detail;
+	public readonly extensions;
 
-	constructor(opts: {
-		message?: string; code: RPC_ERROR_CODE_KEY; cause?: unknown
-	}) {
-		const message = opts.message ?? opts.code;
+	constructor(opts: ErrorOpts) {
+		const title = opts.title ?? opts.code;
 
-		super(message);
+		super(title);
 
-		this.code = opts.code;
 		this.name = 'RPCError';
+		this.code = opts.code;
+		this.type = opts.type;
+		this.title = title;
+		this.detail = opts.detail;
+		this.extensions = opts.extensions;
 	}
 }
