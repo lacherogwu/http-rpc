@@ -5,7 +5,7 @@ layout: home
 hero:
   name: '@http-rpc'
   text: 'Unify Frontend-Backend Interactions'
-  tagline: My great project tagline
+  tagline: RPC layer on top of http with full typesafety and more
   actions:
     - theme: brand
       text: Get Started
@@ -15,22 +15,22 @@ hero:
       link: https://github.com/lacherogwu/http-rpc
 
 features:
-  - icon: ℹ️
-    title: Automatic typesafety
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - icon: ℹ️
-    title: Auto-completion
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - icon: ℹ️
-    title: Unify Frontend-Backend API
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - icon: ℹ️
-    title: Light bundle size
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - icon: ℹ️
-    title: Awesome DX
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - icon: ℹ️
-    title: Framework agnostic
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - icon: 🔗
+    title: Unified Communication
+    details: Seamlessly bridges frontend and backend applications, creating a harmonized communication environment
+  - icon: ⚓
+    title: RPC over HTTP Protocol
+    details: Utilizes the well-established HTTP protocol to deliver robust Remote Procedure Call (RPC) capabilities
+  - icon: 🛠️
+    title: Full TypeScript Support
+    details: Ensures robust coding support with complete TypeScript intellisense, enhancing code accuracy & developer productivity
+  - icon: 🔒
+    title: Typesafety
+    details: Provides strict typing to prevent errors and enhance code quality, leveraging the full power of TypeScript's type system
+  - icon: 💆
+    title: Ease of Integration
+    details: Designed with ease of integration in mind, works cooperatively with existing frontend and backend technologies
+  - icon: 💥
+    title: Efficient Error Handling
+    details: Following Problem Details for HTTP APIs (RFC 9457)
 ---
