@@ -7,7 +7,8 @@ type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
 	input: InputSchema;
 };
 
-type NeverHelper<T, U> = [T] extends [never] ? U : T & U;
+type IsNever<T> = [T] extends [never] ? true : false;
+type IsAny<T> = 0 extends 1 & T ? true : false;
 
 export class Endpoint<
 	Input extends {
@@ -75,9 +76,10 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	}
 
 	input<Schema extends ZodObject<any> | ZodOptional<ZodObject<any>>>(schema: Schema) {
+		type InferredSchema = z.infer<Schema>;
 		return this.#prepare({ input: schema }) as unknown as Route<
 			AdapterContext,
-			Prettify<NeverHelper<InputSchema, z.infer<Schema>>>,
+			Prettify<IsNever<InputSchema> extends true ? InferredSchema : InputSchema & InferredSchema>,
 			OutputSchema,
 			MiddlewareContext
 		>;
@@ -95,7 +97,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		return new Endpoint({
 			method: 'POST',
 			input: this.#input as InputSchema,
-			output: this.#output as T,
+			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
 			middlewares: this.#middlewares,
 		});
@@ -105,7 +107,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		return new Endpoint({
 			method: 'GET',
 			input: this.#input as InputSchema,
-			output: this.#output as T,
+			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
 			middlewares: this.#middlewares,
 		});
