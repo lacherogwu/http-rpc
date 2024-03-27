@@ -5,7 +5,7 @@ export default defineConfig({
   title: '@http-rpc',
   description: 'Unify Frontend-Backend Interactions',
   head: [
-    ['link', { href: '/logo.png', rel: 'icon', type: 'image/png' }],
+    ['link', { href: '/http-rpc/logo.png', rel: 'icon', type: 'image/png' }],
 
   ],
   base: '/http-rpc/',
