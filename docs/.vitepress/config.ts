@@ -16,7 +16,12 @@ export default defineConfig({
 			pattern: 'https://github.com/lacherogwu/http-rpc/edit/main/docs/:path',
 			text: 'Edit this page on GitHub',
 		},
-		nav: [{ text: 'Guide', link: '/introduction' }],
+		nav: [
+			{
+				text: 'Guide',
+				link: '/introduction',
+			},
+		],
 		outline: 'deep',
 		sidebar: [
 			{
@@ -87,9 +92,16 @@ export default defineConfig({
 				],
 			},
 		],
-
-		socialLinks: [{ icon: 'github', link: 'https://github.com/lacherogwu/http-rpc' }],
-
+		socialLinks: [
+			{
+				icon: 'github',
+				link: 'https://github.com/lacherogwu/http-rpc',
+			},
+			{
+				icon: 'npm',
+				link: 'https://www.npmjs.com/search?q=%40http-rpc',
+			},
+		],
 		footer: {
 			copyright: 'Copyright © 2024-present',
 			message: 'Released under the MIT License.',
