@@ -19,22 +19,32 @@ features:
   - icon: 🔗
     title: Unified Communication
     details: Seamlessly bridges frontend and backend applications, creating a harmonized communication environment
-    link: /configuration-options/#output-format
+    link: /introduction
+
   - icon: ⚓
     title: RPC over HTTP Protocol
     details: Utilizes the well-established HTTP protocol to deliver robust Remote Procedure Call (RPC) capabilities
+    link: /introduction
+
   - icon: 🛠️
     title: Full TypeScript Support
     details: Ensures robust coding support with complete TypeScript intellisense, enhancing code accuracy & developer productivity
+    link: /introduction
+
   - icon: 🔒
     title: Typesafety
     details: Provides strict typing to prevent errors and enhance code quality, leveraging the full power of TypeScript's type system
+    link: /introduction
+
   - icon: 💆
     title: Ease of Integration
     details: Designed with ease of integration in mind, works cooperatively with existing frontend and backend technologies
+    link: /introduction
+
   - icon: 💥
     title: Efficient Error Handling
     details: Following Problem Details for HTTP APIs (RFC 9457)
+    link: /introduction
 ---
 
 ## @http-rpc/server

@@ -1,16 +1,4 @@
----
-title: Recommended Usage
----
-
-# {{ $frontmatter.title }}
-
-## Installation
-
-```sh
-npm install @http-rpc/server superjson zod
-```
-
-## Best Practice
+# Server Best Practice
 
 I recommend using [superjson](https://github.com/blitz-js/superjson) as the transformer. It is a superset of JSON that supports Dates, BigInts, and more.
 this is not required, but it is a good practice.
@@ -19,6 +7,12 @@ using this transformer will make your life easier when working with dates, bigin
 ::: warning
 Ensure that the client-side uses the same transformer.
 :::
+
+## Installation
+
+```sh
+npm install @http-rpc/server superjson zod
+```
 
 ## Folder Structure
 

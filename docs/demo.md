@@ -1,8 +1,4 @@
----
-title: Demo
----
-
-# {{ $frontmatter.title }}
+# Demo
 
 - [Fastify](https://github.com/lacherogwu/http-rpc/tree/main/demo/fastify)
 - Express - coming soon

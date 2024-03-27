@@ -1,8 +1,4 @@
----
-title: Input/Output Validation
----
-
-# {{ $frontmatter.title }}
+# Input/Output Validation
 
 ## What is Input/Output Validation?
 

@@ -13,7 +13,8 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.png',
     search: {
-      provider: 'local'
+      provider: 'local',
+
     },
     editLink: {
       pattern: 'https://github.com/lacherogwu/http-rpc/edit/main/docs/:path',
@@ -23,7 +24,6 @@ export default defineConfig({
       { text: 'Guide', link: '/introduction' }
     ],
     outline: 'deep',
-
     sidebar: [
       {
         text: 'Getting started',
@@ -43,30 +43,30 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Backend Usage',
+        text: 'Server Usage',
         items: [
           {
-            link: '/backend-usage/routes',
+            link: '/server-usage/routes',
             text: 'Define Routes'
           },
           {
-            link: '/backend-usage/endpoints',
+            link: '/server-usage/endpoints',
             text: 'Define Endpoints'
           },
           {
-            link: '/backend-usage/middlewares',
+            link: '/server-usage/middlewares',
             text: 'Middlewares'
           },
           {
-            link: '/backend-usage/input-output-validation',
+            link: '/server-usage/input-output-validation',
             text: 'Input/Output Validation'
           },
           {
-            link: '/backend-usage/errors',
+            link: '/server-usage/errors',
             text: 'Errors'
           },
           {
-            link: '/backend-usage/best-practice',
+            link: '/server-usage/best-practice',
             text: 'Best Practice'
           },
         ],

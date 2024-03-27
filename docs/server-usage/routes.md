@@ -1,8 +1,4 @@
----
-title: Routes
----
-
-# {{ $frontmatter.title }}
+# Routes
 
 ## What are Routes?
 

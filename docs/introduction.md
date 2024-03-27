@@ -1,8 +1,4 @@
----
-title: Introduction
----
-
-# {{ $frontmatter.title }}
+# Introduction
 
 [[toc]]
 
@@ -11,6 +7,10 @@ title: Introduction
 The `@http-rpc` package is a cutting-edge tool designed to streamline and unify communication between frontend and backend web applications. By creating a convenient RPC layer over HTTP, it simplifies the development process and facilitates faster delivery. Fully integrated with TypeScript, it offers enhanced code accuracy with IntelliSense and strict type safety. In essence, `@http-rpc` accelerates web development and boosts efficiency, making it an indispensable asset for modern web developers.
 
 inspired by [trpc](https://github.com/trpc/trpc)
+
+### `@http-rpc` vs `trpc`
+
+At the beginning, I used `trpc` and enjoyed it. However, I noticed that on large-scale projects, the intellisense was slow. Being someone who values speed and great developer experience, I couldn't tolerate this. Hence, I developed my own library with a similar concept but improved developer experience. Along the way, I enhanced error handling, middleware implementation, API documentation, and more.
 
 ## Installation
 

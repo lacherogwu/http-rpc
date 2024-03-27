@@ -1,8 +1,4 @@
----
-title: Concepts
----
-
-# {{ $frontmatter.title }}
+# Concepts
 
 ## What is RPC?
 

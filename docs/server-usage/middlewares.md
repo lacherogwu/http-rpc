@@ -1,8 +1,4 @@
----
-title: Middlewares
----
-
-# {{ $frontmatter.title }}
+# Middlewares
 
 ## What are Middlewares?
 

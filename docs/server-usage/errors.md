@@ -1,8 +1,4 @@
----
-title: Errors
----
-
-# {{ $frontmatter.title }}
+# Errors
 
 ## What are Errors?
 

@@ -1,8 +1,4 @@
----
-title: Endpoints
----
-
-# {{ $frontmatter.title }}
+# Endpoints
 
 ## What are Endpoints?
 

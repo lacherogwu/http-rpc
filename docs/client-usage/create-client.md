@@ -1,8 +1,4 @@
----
-title: Create Client
----
-
-# {{ $frontmatter.title }}
+# Create Client
 
 ## What is a Client?
 
