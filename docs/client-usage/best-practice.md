@@ -11,7 +11,7 @@ Ensure that the server-side uses the same transformer.
 ## Installation
 
 ```sh
-npm install @http-rpc/client superjson
+npm i @http-rpc/client superjson
 ```
 
 ```ts

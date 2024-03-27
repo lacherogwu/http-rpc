@@ -7,7 +7,7 @@ Full documentation can be found [here](https://lacherogwu.github.io/http-rpc/).
 ## Installation
 
 ```bash
-npm install @http-rpc/client superjson
+npm i @http-rpc/client superjson
 ```
 
 ## Usage

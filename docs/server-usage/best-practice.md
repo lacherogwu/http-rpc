@@ -11,7 +11,7 @@ Ensure that the client-side uses the same transformer.
 ## Installation
 
 ```sh
-npm install @http-rpc/server superjson zod
+npm i @http-rpc/server superjson zod
 ```
 
 ## Folder Structure

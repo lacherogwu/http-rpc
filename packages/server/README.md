@@ -7,7 +7,7 @@ Full documentation can be found [here](https://lacherogwu.github.io/http-rpc/).
 ## Installation
 
 ```bash
-npm install @http-rpc/server zod fastify superjson
+npm i @http-rpc/server zod fastify superjson
 ```
 
 ## Usage

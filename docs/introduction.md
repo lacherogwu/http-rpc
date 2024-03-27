@@ -15,7 +15,7 @@ At the beginning, I used `trpc` and enjoyed it. However, I noticed that on large
 ## Installation
 
 ```sh
-npm install @http-rpc/server @http-rpc/client zod
+npm i @http-rpc/server @http-rpc/client zod
 ```
 
 ## Quick Start
