@@ -1,4 +1,4 @@
-# Setup
+# Client Setup
 
 ## Installation
 
