@@ -22,14 +22,9 @@ import Fastify from 'fastify';
 import { rpcFastify } from '@http-rpc/server/adapters/fastify';
 import { router } from './rpc/router';
 import superjson from 'superjson';
-import cors from '@fastify/cors';
 
 const fastify = Fastify({
 	logger: true,
-});
-
-fastify.register(cors, {
-	origin: '*',
 });
 
 fastify.register(rpcFastify, {
