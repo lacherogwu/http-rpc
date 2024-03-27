@@ -8,9 +8,9 @@ RPC (Remote Procedure Call) is a protocol enabling a computer program to run cod
 // HTTP/REST
 const res = await fetch('/api/users/1');
 const user = await res.json();
-//    ^? const user: any
+//    ^? any
 
 // RPC
 const user = await api.users.getById({ id: 1 });
-//    ^? const user: { id: number, name: string, email: string }
+//    ^? { id: number, name: string, email: string }
 ```

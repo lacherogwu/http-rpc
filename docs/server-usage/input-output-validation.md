@@ -49,7 +49,7 @@ export const createUser = protectedRoute
 		const { username, password, email } = ctx.input;
 
 		const user = await createUserRecord({ username, password, email });
-		//    ^? const user: { id: number, username: string, password: string, email: string }
+		//    ^? { id: number, username: string, password: string, email: string }
 
 		return user;
 	});
