@@ -56,7 +56,7 @@ export const someEndpoint = publicRoute.get(() => {
 ::: code-group
 
 ```ts [client.ts]
-const result = await client.someEndpoint();
+const result = await client.someEndpoint.get();
 // ^? { someMap: Map<string, string>, date: Date, primitive: number }
 ```
 
