@@ -9,6 +9,7 @@ type Ctx<AdapterContext extends BaseCtx, InputSchema = unknown> = {
 
 type IsNever<T> = [T] extends [never] ? true : false;
 type IsAny<T> = 0 extends 1 & T ? true : false;
+type FormatInput<T, U> = IsNever<T> extends true ? U : T & U;
 
 export class Endpoint<
 	Input extends {
@@ -76,10 +77,9 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	}
 
 	input<Schema extends ZodObject<any> | ZodOptional<ZodObject<any>>>(schema: Schema) {
-		type InferredSchema = z.infer<Schema>;
 		return this.#prepare({ input: schema }) as unknown as Route<
 			AdapterContext,
-			Prettify<IsNever<InputSchema> extends true ? InferredSchema : InputSchema & InferredSchema>,
+			Prettify<FormatInput<InputSchema, z.infer<Schema>>>,
 			OutputSchema,
 			MiddlewareContext
 		>;
