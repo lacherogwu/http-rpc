@@ -1,3 +1,5 @@
 # HTTP Remote Procedure Call (RPC)
 
-inspired by [trpc](https://github.com/trpc/trpc)
+## Documentation
+
+Full documentation can be found [here](https://lacherogwu.github.io/http-rpc/).

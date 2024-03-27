@@ -35,4 +35,4 @@ export const protectedRoute = publicRoute.middleware(async ctx => {
 
 :::
 
-Continue to the [Define Endpoint](./endpoints.md) section to see how to apply these routes.
+Continue to the [Define Endpoints](./endpoints.md) section to see how to apply these routes.
