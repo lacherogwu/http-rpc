@@ -62,7 +62,7 @@ export default defineConfig({
 					},
 					{
 						link: '/server-usage/input-output-validation',
-						text: 'Input/Output Validation',
+						text: 'Input & Output Validation',
 					},
 					{
 						link: '/server-usage/errors',

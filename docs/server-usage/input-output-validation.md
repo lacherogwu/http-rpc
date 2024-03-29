@@ -1,10 +1,10 @@
-# Input/Output Validation
+# Input & Output Validation
 
-## What is Input/Output Validation?
+## What is Input & Output Validation?
 
-Input/Output validation is the process of ensuring that the data received by the server is in the correct format and that the data sent by the server is in the correct format.
+Input & Output validation is the process of ensuring that the data received by the server is in the correct format and that the data sent by the server is in the correct format.
 
-we use [zod](https://github.com/colinhacks/zod) for input/output validation.
+we use [zod](https://github.com/colinhacks/zod) for input & output validation.
 
 ## How to Validate Input
 
