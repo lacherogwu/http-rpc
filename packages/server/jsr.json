@@ -1,0 +1,8 @@
+{
+	"name": "@http-rpc/server",
+	"version": "0.2.14",
+	"exports": {
+		".": "./src/index.ts",
+		"./adapters/fastify": "./src/adapters/fastify.ts"
+	}
+}
