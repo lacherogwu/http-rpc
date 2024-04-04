@@ -20,7 +20,11 @@ npm i @http-rpc/server @http-rpc/client zod
 
 ## Quick Start
 
-First, set up a server using `fastify`. We are currently expanding to support additional frameworks.
+First, set up a server using `fastify`.
+
+::: info
+We are currently expanding to support additional frameworks.
+:::
 
 then add our server adapter:
 ::: code-group
