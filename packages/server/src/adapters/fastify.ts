@@ -50,6 +50,7 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 			const handler = async (req: FastifyRequestWithCtx, res: FastifyReply) => {
 				const ctx = attachCtx(req, res);
 				const data = await route.handler(ctx);
+				if (res.sent) return;
 				return { data };
 			};
 
