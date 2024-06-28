@@ -14,6 +14,7 @@ type FastifyPluginOptions = {
 	router: Router;
 	prefix?: string;
 	transformer?: DataTransformer;
+	onError?: (result: Record<string, any>, err: Error) => any;
 };
 
 export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
@@ -80,9 +81,9 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 	}
 	registerRoutes('', router);
 
-	fastify.setErrorHandler((err, req, res) => {
+	fastify.setErrorHandler(async (err, req, res) => {
 		res.header('Content-Type', 'application/problem+json');
-		const result = {
+		let result = {
 			status: 500,
 			title: err.message ?? 'Internal Server Error',
 			code: 'INTERNAL_SERVER_ERROR',
@@ -111,7 +112,18 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 			Object.assign(result, extensions);
 		}
 
-		return res.status(result.status).send(JSON.stringify(result));
+		const onErrResult = async () => {
+			try {
+				return await opts.onError?.(result, err);
+			} catch (err) {
+				console.error(err);
+			}
+		};
+
+		// @ts-ignore
+		result = (await onErrResult()) ?? result;
+
+		return res.status(result.status ?? 500).send(JSON.stringify(result));
 	});
 
 	done();
