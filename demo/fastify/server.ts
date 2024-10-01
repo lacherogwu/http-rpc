@@ -15,7 +15,6 @@ publicRoute.on('afterMiddlewares', ctx => {
 });
 
 const protectedRoute = publicRoute.middleware(ctx => {
-	console.log('<PROTECTED>');
 	const token = ctx.req.headers.authorization;
 	if (!token) {
 		throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
