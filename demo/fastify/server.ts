@@ -9,6 +9,11 @@ const fastify = Fastify({
 });
 
 const publicRoute = createRoute<FastifyContext>();
+
+publicRoute.on('afterMiddlewares', ctx => {
+	console.log('publicRoute afterMiddleware');
+});
+
 const protectedRoute = publicRoute.middleware(ctx => {
 	const token = ctx.req.headers.authorization;
 	if (!token) {
@@ -18,6 +23,10 @@ const protectedRoute = publicRoute.middleware(ctx => {
 	return {
 		userToken: token,
 	};
+});
+
+protectedRoute.on('afterMiddlewares', ctx => {
+	console.log('protectedRoute afterMiddleware');
 });
 
 const router = {

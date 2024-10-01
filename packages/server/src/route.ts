@@ -11,6 +11,9 @@ type IsNever<T> = [T] extends [never] ? true : false;
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type FormatInput<T, U> = IsNever<T> extends true ? U : T & U;
 
+type Event = 'afterMiddlewares';
+type EventCbCtx<AdapterContext extends BaseCtx, MiddlewareContext = {}> = Pick<Ctx<AdapterContext>, 'req' | 'res'> & MiddlewareContext & Record<string, any>;
+
 export class Endpoint<
 	Input extends {
 		method: 'GET' | 'POST';
@@ -43,11 +46,13 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	#input: ZodObject<any>;
 	#output: any;
 	#middlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
+	#afterMiddlewares: ((ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => any)[];
 
 	constructor(data?: any) {
 		this.#input = data?.input ?? z.any();
 		this.#output = data?.output ?? z.any();
 		this.#middlewares = data?.middlewares ?? [];
+		this.#afterMiddlewares = data?.afterMiddlewares ?? [];
 	}
 
 	#isZodObject(schema?: ZodAny | ZodObject<any>): schema is ZodObject<any> {
@@ -73,6 +78,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 			method: data.method,
 			handler: data.handler,
 			middlewares: this.#middlewares.concat(data.middleware).filter(Boolean),
+			afterMiddlewares: this.#afterMiddlewares.slice(),
 		});
 	}
 
@@ -99,7 +105,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 			input: this.#input as InputSchema,
 			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
-			middlewares: this.#middlewares,
+			middlewares: this.#middlewares.concat(this.#afterMiddlewares),
 		});
 	}
 
@@ -109,8 +115,16 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 			input: this.#input as InputSchema,
 			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
-			middlewares: this.#middlewares,
+			middlewares: this.#middlewares.concat(this.#afterMiddlewares),
 		});
+	}
+
+	on(event: Event, cb: (ctx: EventCbCtx<AdapterContext, MiddlewareContext>) => void | Promise<void>) {
+		switch (event) {
+			case 'afterMiddlewares':
+				this.#afterMiddlewares.push(cb);
+				break;
+		}
 	}
 }
 
