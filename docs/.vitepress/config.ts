@@ -69,6 +69,10 @@ export default defineConfig({
 						text: 'Errors',
 					},
 					{
+						link: '/server-usage/events',
+						text: 'Events',
+					},
+					{
 						link: '/server-usage/best-practice',
 						text: 'Best Practice',
 					},

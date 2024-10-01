@@ -9,7 +9,13 @@ const fastify = Fastify({
 });
 
 const publicRoute = createRoute<FastifyContext>();
+
+publicRoute.on('afterMiddlewares', ctx => {
+	console.log('publicRoute afterMiddleware');
+});
+
 const protectedRoute = publicRoute.middleware(ctx => {
+	console.log('<PROTECTED>');
 	const token = ctx.req.headers.authorization;
 	if (!token) {
 		throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
@@ -18,6 +24,10 @@ const protectedRoute = publicRoute.middleware(ctx => {
 	return {
 		userToken: token,
 	};
+});
+
+protectedRoute.on('afterMiddlewares', ctx => {
+	console.log('protectedRoute afterMiddleware');
 });
 
 const router = {
