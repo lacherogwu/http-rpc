@@ -123,7 +123,7 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		return new Endpoint({
 			method: 'SSE',
 			input: this.#input as InputSchema,
-			output: z.any(),
+			output: z.any() as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
 			middlewares: this.#middlewares.concat(this.#afterMiddlewares),
 		});
