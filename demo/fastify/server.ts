@@ -84,14 +84,24 @@ const router = {
 					cool: z.boolean(),
 				}),
 			)
+			.output(
+				z.object({
+					i: z.number(),
+					userToken: z.string(),
+					date: z.date(),
+				}),
+			)
 			.sse(async function* (ctx) {
 				const { userToken } = ctx;
 
 				let i = 0;
 				while (true) {
-					yield { i, userToken, date: new Date(), input: ctx.input };
+					yield { i, userToken, date: new Date() };
 					await new Promise(resolve => setTimeout(resolve, 500));
 					i++;
+					if (i > 10) {
+						break;
+					}
 				}
 			}),
 	},

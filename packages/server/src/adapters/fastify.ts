@@ -68,13 +68,25 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify: FastifyInstance, op
 						res.raw.write(`data: ${JSON.stringify(data)}\n\n`);
 					};
 
+					const outputSchema = route.output as ZodAny;
+
 					(async () => {
-						for await (const data of iterator) {
-							let output = data;
-							if (transformer) {
-								output = transformer.serialize(output);
+						try {
+							for await (const data of iterator) {
+								const parsedResult = outputSchema.safeParse(data);
+								if (parsedResult.success) {
+									let output = parsedResult.data;
+									if (transformer) {
+										output = transformer.serialize(output);
+									}
+									sendEvent({ data: output });
+								} else {
+									res.raw.end();
+									break;
+								}
 							}
-							sendEvent({ data: output });
+						} finally {
+							res.raw.end();
 						}
 					})();
 
