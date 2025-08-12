@@ -25,3 +25,85 @@ export const client = createClient<Router>({
 - `onRequest?`: A function that is called before every request.
 - `onResponse?`: A function that is called after every response.
 - `onError?`: A function that is called when an error occurs.
+
+## withCredentials Support
+
+The client automatically sets `withCredentials: true` for all requests, enabling cookie-based authentication and CORS credentials:
+
+```ts
+const client = createClient<Router>({
+	url: 'http://localhost:3000/rpc',
+	async headers() {
+		return {
+			Authorization: 'Bearer token', // You still need to set headers manually
+		};
+	},
+});
+
+// All requests will automatically include cookies for authentication
+// Authorization headers must be set manually via the headers option
+const data = await client.users.list.get();
+```
+
+::: info About withCredentials
+`withCredentials: true` automatically includes cookies in requests for cookie-based authentication. Authorization headers and other custom headers still need to be set manually using the `headers` option.
+:::
+
+## Server-Sent Events (SSE) - Experimental
+
+::: warning Experimental Feature
+SSE support is currently experimental and the API may change in future versions. Current limitations:
+
+- No built-in error handling out of the box
+- Output validation is not supported (no `.output()` schema validation)
+- Basic implementation focused on core functionality
+  :::
+
+You can consume Server-Sent Events using the `.sse()` method on the client:
+
+```ts
+// Connect to an SSE endpoint
+const eventStream = await client.events.liveUpdates.sse({
+	channel: 'notifications',
+});
+
+// Consume events using async iteration
+for await (const event of eventStream) {
+	console.log('Received event:', event);
+	// Handle the real-time data
+}
+```
+
+### Basic SSE Usage
+
+```ts
+// Simple SSE consumption
+const eventStream = await client.events.liveUpdates.sse({
+	channel: 'notifications',
+});
+
+for await (const event of eventStream) {
+	console.log('Event received:', event);
+
+	// You can break out of the loop to stop listening
+	if (event.shouldStop) {
+		break;
+	}
+}
+```
+
+### Current SSE Features
+
+- **Input Validation**: Supports input parameters like regular endpoints
+- **Credentials**: Automatically includes cookies (withCredentials)
+- **Real-time Streaming**: Low-latency data streaming from server to client
+- **Type Safety**: TypeScript support for input parameters
+
+### Current Limitations
+
+- **No Output Validation**: Cannot use `.output()` schema validation on SSE endpoints
+- **No Error Handling**: No built-in error handling out of the box
+
+::: tip
+SSE connections automatically include cookies via `withCredentials`, making them suitable for cookie-based authenticated real-time features. The browser's EventSource provides automatic reconnection, but you'll need to implement your own error handling logic.
+:::
