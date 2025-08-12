@@ -119,11 +119,11 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 		});
 	}
 
-	sse<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
+	sse<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => AsyncGenerator<T>) {
 		return new Endpoint({
 			method: 'SSE',
 			input: this.#input as InputSchema,
-			output: z.any() as IsAny<OutputSchema> extends true ? T : OutputSchema,
+			output: this.#output as IsAny<OutputSchema> extends true ? AsyncGenerator<T> : AsyncGenerator<OutputSchema>,
 			handler: cb,
 			middlewares: this.#middlewares.concat(this.#afterMiddlewares),
 		});

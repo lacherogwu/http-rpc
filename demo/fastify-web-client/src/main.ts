@@ -39,9 +39,9 @@ console.log('🚀 → users:', users);
 const user = await client.users.create.post({ name: 'Charlie' });
 console.log('🚀 → user:', user);
 
-const xx = await client.events.special.sse({ cool: false });
+const eventSource = await client.events.special.sse({ cool: false });
 (async () => {
-	for await (const item of xx) {
+	for await (const item of eventSource) {
 		console.log({ item });
 	}
 })();

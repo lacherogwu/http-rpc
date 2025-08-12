@@ -74,12 +74,12 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 		if (method === 'sse') {
 			const reqUrl = `${url}/${urlPath}`;
 			const finalUrl = input ? `${reqUrl}?input=${inputSerializer(input)}` : reqUrl;
-			const sse = new EventSource(finalUrl, { withCredentials: true });
+			const eventSource = new EventSource(finalUrl, { withCredentials: true });
 
 			const dataQueue: any[] = [];
 			let resolve: ((value: any) => void) | null = null;
 
-			sse.onmessage = event => {
+			eventSource.onmessage = event => {
 				const response: { data: any } = JSON.parse(event.data);
 				let data = response.data;
 				if (transformer) {
@@ -93,17 +93,42 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 				}
 			};
 
-			return (async function* () {
-				while (true) {
-					if (dataQueue.length > 0) {
-						yield dataQueue.shift();
-					} else {
-						yield await new Promise(res => {
-							resolve = res;
-						});
-					}
+			const close = () => {
+				eventSource.close();
+				if (resolve) {
+					resolve(null);
+					resolve = null;
 				}
-			})();
+			};
+
+			eventSource.onerror = () => {
+				close();
+			};
+
+			async function* generator() {
+				try {
+					while (true) {
+						if (eventSource.readyState === eventSource.CLOSED) {
+							break;
+						}
+
+						if (dataQueue.length > 0) {
+							yield dataQueue.shift();
+						} else {
+							const data = await new Promise(res => {
+								resolve = res;
+							});
+							if (data !== null) {
+								yield data;
+							}
+						}
+					}
+				} finally {
+					close();
+				}
+			}
+
+			return generator();
 		}
 
 		const request: Record<string, any> = {
