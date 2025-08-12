@@ -1,6 +1,6 @@
 {
 	"name": "@http-rpc/server",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "HTTP RPC Server",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -55,10 +55,10 @@
 		"directory": "packages/server"
 	},
 	"dependencies": {
-		"fastify-plugin": "^4.5.1",
-		"zod": "^3.22.4"
+		"fastify-plugin": "^5.0.1",
+		"zod": "^4.0.17"
 	},
 	"devDependencies": {
-		"fastify": "^4.26.2"
+		"fastify": "^5.5.0"
 	}
 }

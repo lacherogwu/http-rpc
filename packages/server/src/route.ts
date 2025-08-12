@@ -16,7 +16,7 @@ type EventCbCtx<AdapterContext extends BaseCtx, MiddlewareContext = {}> = Pick<C
 
 export class Endpoint<
 	Input extends {
-		method: 'GET' | 'POST';
+		method: 'GET' | 'POST' | 'SSE';
 		input?: any;
 		output: any;
 		handler: (ctx: any) => any;
@@ -56,11 +56,11 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	}
 
 	#isZodObject(schema?: ZodAny | ZodObject<any>): schema is ZodObject<any> {
-		return schema?._def?.typeName === 'ZodObject';
+		return schema?.def?.type === 'object';
 	}
 
 	#isZodAny(schema?: ZodAny | ZodObject<any>): schema is ZodAny {
-		return schema?._def?.typeName === 'ZodAny';
+		return schema?.def?.type === 'any';
 	}
 
 	#prepare(data: any) {
@@ -112,6 +112,16 @@ export class Route<AdapterContext extends BaseCtx, InputSchema = never, OutputSc
 	get<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
 		return new Endpoint({
 			method: 'GET',
+			input: this.#input as InputSchema,
+			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
+			handler: cb,
+			middlewares: this.#middlewares.concat(this.#afterMiddlewares),
+		});
+	}
+
+	sse<T extends OutputSchema>(cb: (ctx: Ctx<AdapterContext, InputSchema> & MiddlewareContext) => T | Promise<T>) {
+		return new Endpoint({
+			method: 'SSE',
 			input: this.#input as InputSchema,
 			output: this.#output as IsAny<OutputSchema> extends true ? T : OutputSchema,
 			handler: cb,
