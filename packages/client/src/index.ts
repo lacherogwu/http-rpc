@@ -93,7 +93,7 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 				}
 			};
 
-			const iterator = async function* () {
+			return (async function* () {
 				while (true) {
 					if (dataQueue.length > 0) {
 						yield dataQueue.shift();
@@ -103,9 +103,7 @@ export function createClient<T>(opts?: Opts): ClientType<T> {
 						});
 					}
 				}
-			};
-
-			return iterator();
+			})();
 		}
 
 		const request: Record<string, any> = {
