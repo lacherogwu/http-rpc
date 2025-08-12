@@ -55,11 +55,8 @@ const data = await client.users.list.get();
 SSE support is currently experimental and the API may change in future versions. Current limitations:
 
 - No built-in error handling out of the box
-- Output validation is not supported (no `.output()` schema validation)
 - Basic implementation focused on core functionality
-  :::
-
-You can consume Server-Sent Events using the `.sse()` method on the client:
+  :::You can consume Server-Sent Events using the `.sse()` method on the client:
 
 ```ts
 // Connect to an SSE endpoint
@@ -96,13 +93,13 @@ for await (const data of eventStream) {
 ### Current SSE Features
 
 - **Input Validation**: Supports input parameters like regular endpoints
+- **Output Validation**: Supports output schema validation - invalid data terminates the stream
 - **Credentials**: Automatically includes cookies (withCredentials)
 - **Real-time Streaming**: Low-latency data streaming from server to client
-- **Type Safety**: TypeScript support for input parameters
+- **Type Safety**: TypeScript support for input parameters and output data
 
 ### Current Limitations
 
-- **No Output Validation**: Cannot use `.output()` schema validation on SSE endpoints
 - **No Error Handling**: No built-in error handling out of the box
 
 ::: tip

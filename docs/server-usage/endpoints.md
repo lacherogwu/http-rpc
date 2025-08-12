@@ -29,11 +29,8 @@ export const createProduct = protectedRoute.post(async ctx => {
 ## Server-Sent Events (SSE) - Experimental
 
 ::: warning Experimental Feature
-SSE support is currently experimental and the API may change in future versions. Current limitations:
-
-- Output validation is not supported (cannot use `.output()` schemas)
-- Basic implementation focused on core streaming functionality
-  :::
+SSE support is currently experimental and the API may change in future versions.
+:::
 
 Server-Sent Events allow the server to push data to the client in real-time. Use the `.sse()` method to create an SSE endpoint:
 
@@ -46,7 +43,14 @@ export const liveUpdates = protectedRoute
 			channel: z.string(),
 		}),
 	)
-	// Note: .output() is not supported for SSE endpoints
+	.output(
+		z.object({
+			counter: z.number(),
+			channel: z.string(),
+			timestamp: z.date(),
+			message: z.string(),
+		}),
+	)
 	.sse(async function* (ctx) {
 		const { channel } = ctx.input;
 
@@ -72,10 +76,13 @@ export const liveUpdates = protectedRoute
 - Uses a generator function (`function*`) that yields data
 - Automatically sets appropriate SSE headers (`text/event-stream`, etc.)
 - Supports input validation like regular endpoints
+- **Supports output validation** - each yielded value is validated against the output schema
 - Can access middleware context (user, auth, etc.)
 - Sends data as JSON events to the client
+- **Stream terminates** if output validation fails
 
-### Current Limitations:
+### Output Schema Validation:
 
-- **No Output Validation**: Cannot chain `.output()` for response schema validation
-- Data yielded from the generator is sent as-is (with transformer if configured)
+- Each value yielded from the generator is validated against the `.output()` schema
+- If validation fails, the SSE stream is automatically terminated
+- Only valid data that passes schema validation is sent to the client
