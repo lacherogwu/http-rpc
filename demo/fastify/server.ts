@@ -3,9 +3,15 @@ import { FastifyContext, rpcFastify } from '@http-rpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import superjson from 'superjson';
 import { z } from 'zod';
+import fastifyCors from '@fastify/cors';
 
 const fastify = Fastify({
 	logger: true,
+});
+
+fastify.register(fastifyCors, {
+	origin: 'http://localhost:5173',
+	credentials: true,
 });
 
 const publicRoute = createRoute<FastifyContext>();
@@ -15,9 +21,10 @@ publicRoute.on('afterMiddlewares', ctx => {
 });
 
 const protectedRoute = publicRoute.middleware(ctx => {
-	const token = ctx.req.headers.authorization;
+	let token = ctx.req.headers.authorization;
 	if (!token) {
-		throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
+		// throw new RPCError({ code: 'UNAUTHORIZED', title: 'Missing token' });
+		token = 'UNKNOWN'; // for testing SSE in browser because you cannot pass headers, only cookies using { withCredentials: true }
 	}
 
 	return {
@@ -69,6 +76,24 @@ const router = {
 				title: 'Not implemented',
 			});
 		}),
+	},
+	events: {
+		special: protectedRoute
+			.input(
+				z.object({
+					cool: z.boolean(),
+				}),
+			)
+			.sse(async function* (ctx) {
+				const { userToken } = ctx;
+
+				let i = 0;
+				while (true) {
+					yield { i, userToken, date: new Date(), input: ctx.input };
+					await new Promise(resolve => setTimeout(resolve, 500));
+					i++;
+				}
+			}),
 	},
 };
 

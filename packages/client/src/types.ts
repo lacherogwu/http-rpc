@@ -25,7 +25,7 @@ export type ClientType<T> =
 					input?: unknown;
 					output?: unknown;
 				}
-					? M extends 'GET' | 'POST'
+					? M extends 'GET' | 'POST' | 'SSE'
 						? {
 								[P in M as Lowercase<P>]: [T[K]['input']] extends [never] //
 									? () => Promise<InferPromise<T[K]['output']>>

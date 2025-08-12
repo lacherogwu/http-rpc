@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 import { Endpoint } from '../route';
-import type { FastifyReply, FastifyRequest, FastifySchemaCompiler } from 'fastify';
+import type { FastifyError, FastifyInstance, FastifyReply, FastifyRequest, FastifySchemaCompiler } from 'fastify';
 import type { FastifySerializerCompiler } from 'fastify/types/schema';
 import type { ZodAny, ZodError } from 'zod';
 import type { Router, DataTransformer, BaseCtx } from '../types';
@@ -18,8 +18,7 @@ type FastifyPluginOptions = {
 };
 
 export type FastifyContext = BaseCtx<FastifyRequest, FastifyReply>;
-
-export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
+export const rpcFastify = fp<FastifyPluginOptions>((fastify: FastifyInstance, opts: FastifyPluginOptions, done: (error?: FastifyError) => void) => {
 	const { prefix, transformer, router } = opts;
 
 	fastify.setValidatorCompiler(createValidatorCompiler(transformer));
@@ -32,6 +31,11 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 					200: route.output,
 				},
 			};
+
+			const isSSE = route.method === 'SSE';
+			if (isSSE) {
+				route.method = 'GET';
+			}
 
 			if (route.method === 'GET') {
 				Object.assign(schema, {
@@ -50,8 +54,36 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 
 			const handler = async (req: FastifyRequestWithCtx, res: FastifyReply) => {
 				const ctx = attachCtx(req, res);
+				if (isSSE) {
+					const iterator = route.handler(ctx);
+
+					res.raw.writeHead(200, {
+						...(res.getHeaders() as Record<string, string>),
+						'Content-Type': 'text/event-stream',
+						'Cache-Control': 'no-cache',
+						Connection: 'keep-alive',
+					});
+
+					const sendEvent = (data: any) => {
+						res.raw.write(`data: ${JSON.stringify(data)}\n\n`);
+					};
+
+					(async () => {
+						for await (const data of iterator) {
+							let output = data;
+							if (transformer) {
+								output = transformer.serialize(output);
+							}
+							sendEvent({ data: output });
+						}
+					})();
+
+					return res;
+				}
+
 				const data = await route.handler(ctx);
 				if (res.sent) return;
+
 				return { data };
 			};
 
@@ -130,21 +162,21 @@ export const rpcFastify = fp<FastifyPluginOptions>((fastify, opts, done) => {
 });
 
 class RequestValidationError extends Error {
-	errors: ZodError['errors'];
+	errors: ZodError['issues'];
 	constructor(err: ZodError) {
 		super("Request doesn't match the schema");
 		this.name = 'RequestValidationError';
-		this.errors = err.errors;
+		this.errors = err.issues;
 	}
 }
 
 class ResponseValidationError extends Error {
-	errors: ZodError['errors'];
+	errors: ZodError['issues'];
 
 	constructor(error: ZodError) {
 		super("Response doesn't match the schema");
 		this.name = 'ResponseValidationError';
-		this.errors = error.errors;
+		this.errors = error.issues;
 	}
 }
 
