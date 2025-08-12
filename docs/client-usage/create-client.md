@@ -68,8 +68,8 @@ const eventStream = await client.events.liveUpdates.sse({
 });
 
 // Consume events using async iteration
-for await (const event of eventStream) {
-	console.log('Received event:', event);
+for await (const data of eventStream) {
+	console.log('Received data:', data);
 	// Handle the real-time data
 }
 ```
@@ -82,11 +82,12 @@ const eventStream = await client.events.liveUpdates.sse({
 	channel: 'notifications',
 });
 
-for await (const event of eventStream) {
-	console.log('Event received:', event);
+for await (const data of eventStream) {
+	console.log('Data received:', data);
+	// data is exactly what the server yielded
 
-	// You can break out of the loop to stop listening
-	if (event.shouldStop) {
+	// You can break out of the loop based on your own logic
+	if (someCondition) {
 		break;
 	}
 }
