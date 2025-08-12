@@ -96,7 +96,7 @@ const router = {
 
 				let i = 0;
 				while (true) {
-					yield { i, userToken, date: new Date(), input: ctx.input, test: true };
+					yield { i, userToken, date: new Date(), input: ctx.input };
 					await new Promise(resolve => setTimeout(resolve, 500));
 					i++;
 					if (i > 10) {
